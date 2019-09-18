@@ -14,8 +14,4 @@ void printTree(TreeNode *t, int n);
 
 void printTree2(TreeNode *t, int n, char *s);
 
-Info *generateCod3DList(TreeNode *t);
-
-void printCod3DList();
-
 #endif
