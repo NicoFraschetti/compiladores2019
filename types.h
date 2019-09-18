@@ -19,4 +19,24 @@ typedef struct TreeNode{
 	char *label;
 }TreeNode;
 
+//enum Op{ASIGI,ADDI,MULI,SUBI,DIVI,MODI,PRINT};
+
+typedef enum {
+	ASIGI,
+	ADDI,
+	MULI,
+	SUBI,
+	DIVI,
+	MODI,
+	PRINT,	
+} Op;
+
+typedef struct Cod3D {
+	Op opCod;
+	Info *arg1;
+	Info *arg2;
+	Info *result;
+	struct Cod3D *next;
+} Cod3D;
+
 #endif

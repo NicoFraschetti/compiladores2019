@@ -1,8 +1,5 @@
-var y = 8%3;
-var z = 3*y;
-var x = 3*z;
-x = x+1;
-printi (y);
-printi (x);
-printi (z);
+var x = 100;
+x = x + 1;
+x = 1 + x;
+
 

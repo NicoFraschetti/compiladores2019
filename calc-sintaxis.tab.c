@@ -441,8 +441,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    29,    29,    33,    34,    37,    43,    50,    51,    55,
-      60,    66,    67,    80,    81,    82,    83,    84,    85,    89
+       0,    29,    29,    36,    37,    40,    46,    53,    54,    58,
+      63,    69,    70,    83,    84,    85,    86,    87,    88,    92
 };
 #endif
 
@@ -1232,74 +1232,77 @@ yyreduce:
     {
         case 2:
 #line 29 "calc-sintaxis.y" /* yacc.c:1646  */
-    { (yyval.node) = createNode((yyvsp[-1].node),(yyvsp[0].node),NULL,"next"); }
-#line 1237 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+    { (yyval.node) = createNode((yyvsp[-1].node),(yyvsp[0].node),NULL,"next");
+                         generateCod3DList((yyval.node));
+                         printCod3DList(); 
+                       }
+#line 1240 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 33 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 36 "calc-sintaxis.y" /* yacc.c:1646  */
     {    (yyval.node) = createNode((yyvsp[-1].node),(yyvsp[0].node),NULL,"next"); }
-#line 1243 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1246 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 34 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 37 "calc-sintaxis.y" /* yacc.c:1646  */
     {    (yyval.node) = NULL; }
-#line 1249 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1252 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 37 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 40 "calc-sintaxis.y" /* yacc.c:1646  */
     {
 
                                 insertInTable((yyvsp[-1].node)->info->name,-1,0);
 
 
                            }
-#line 1260 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1263 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 43 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 46 "calc-sintaxis.y" /* yacc.c:1646  */
     { 
                                 insertInTable((yyvsp[-3].node)->info->name,evalTree((yyvsp[-1].node)),1);
                                 (yyval.node) = createNode((yyvsp[-3].node),(yyvsp[-1].node),NULL,"asig"); 
                            }
-#line 1269 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1272 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 50 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 53 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-1].node),(yyvsp[0].node),NULL,"next"); }
-#line 1275 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1278 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 55 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 58 "calc-sintaxis.y" /* yacc.c:1646  */
     {   
                                     updateTable((yyvsp[-3].node)->info->name,evalTree((yyvsp[-1].node)));
 
                                     (yyval.node) = createNode((yyvsp[-3].node),(yyvsp[-1].node),NULL,"asig"); 
                                 }
-#line 1285 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1288 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 60 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 63 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),NULL,NULL,"printi");
                                     printf("resultado es %d\n",evalTree((yyval.node)->leftChild)); 
                                 }
-#line 1293 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1296 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 66 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 69 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode(NULL,NULL,createNodeInfo(NULL,(yyvsp[0].node)->info->value),"int"); }
-#line 1299 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1302 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 67 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 70 "calc-sintaxis.y" /* yacc.c:1646  */
     { 
                     ListNode *aux = findListNode((yyvsp[0].node)->info->name);
                     if (aux==NULL){
@@ -1313,55 +1316,55 @@ yyreduce:
                     (yyval.node) = createNode(NULL,NULL,aux->info,"var");
                   
                 }
-#line 1317 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1320 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 80 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 83 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),(yyvsp[0].node),NULL,"add"); }
-#line 1323 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1326 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 81 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 84 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),(yyvsp[0].node),NULL,"sub"); }
-#line 1329 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1332 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 82 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 85 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),(yyvsp[0].node),NULL,"mul"); }
-#line 1335 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1338 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 83 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 86 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),(yyvsp[0].node),NULL,"div"); }
-#line 1341 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1344 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 84 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 87 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),(yyvsp[0].node),NULL,"mod"); }
-#line 1347 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1350 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 85 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 88 "calc-sintaxis.y" /* yacc.c:1646  */
     {   Info *info = createNodeInfo(NULL, -1);
                             (yyval.node) = createNode((yyvsp[0].node),createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
-#line 1355 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1358 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 89 "calc-sintaxis.y" /* yacc.c:1646  */
+#line 92 "calc-sintaxis.y" /* yacc.c:1646  */
     { (yyval.node) = (yyvsp[-1].node); }
-#line 1361 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1364 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1365 "calc-sintaxis.tab.c" /* yacc.c:1646  */
+#line 1368 "calc-sintaxis.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1589,7 +1592,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 92 "calc-sintaxis.y" /* yacc.c:1906  */
+#line 95 "calc-sintaxis.y" /* yacc.c:1906  */
 
 
 

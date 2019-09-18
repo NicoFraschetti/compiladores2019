@@ -26,7 +26,10 @@ int yylex(void);
 %%
 
 program:
-    decls statements   { $$ = createNode($1,$2,NULL,"next"); }
+    decls statements   { $$ = createNode($1,$2,NULL,"next");
+                         generateCod3DList($$);
+                         printCod3DList(); 
+                       }
     ;
 
 decls: 
