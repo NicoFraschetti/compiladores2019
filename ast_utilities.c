@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "ast_utilities.h"
+#include "offset_generator.h"
 
 TreeNode *root;
 
@@ -41,6 +42,7 @@ Info *createNodeInfo(char *name, int value){
 	Info *aux = (Info *) malloc(sizeof(Info));
 	aux->name = name;
 	aux->value = value;
+	aux->offSet = -1;
 }
 
 void printTree(TreeNode *t, int n){

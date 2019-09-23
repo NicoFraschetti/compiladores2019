@@ -5,6 +5,7 @@
 #include <string.h>
 #include "cod_3D_list_utilities.h"
 #include "ast_utilities.h"
+#include "offset_generator.h"
 
 Cod3D *head, *tail;
 
@@ -28,6 +29,7 @@ Info *generateNextTmp(){
 	char *name = (char *) malloc(sizeof(char *)*5);
 	sprintf(name,"t%d",tmpCount++);
 	Info *info = createNodeInfo(name,-1);
+	info->offSet = getOffSet();
 
 }
 
@@ -87,15 +89,15 @@ void printCod3DList(){
 	while (aux!=NULL){
 		printf("[%d,",aux->opCod);
 		if (aux->arg1!=NULL)
-			printf("(%s,%d),",aux->arg1->name,aux->arg1->value);
+			printf("(%s,%d,offset=%d),",aux->arg1->name,aux->arg1->value,aux->arg1->offSet);
 		else
 			printf("null,");
 		if (aux->arg2!=NULL)
-			printf("(%s,%d),",aux->arg2->name,aux->arg2->value);
+			printf("(%s,%d,offset=%d),",aux->arg2->name,aux->arg2->value,aux->arg2->offSet);
 		else
 			printf("null,");
 		if (aux->result!=NULL)
-			printf("(%s,%d)]\n",aux->result->name,aux->result->value);
+			printf("(%s,%d,offset=%d)]\n",aux->result->name,aux->result->value,aux->result->offSet);
 		else
 			printf("null]\n");
 		aux = aux->next;		

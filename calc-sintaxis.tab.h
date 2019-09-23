@@ -57,7 +57,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 15 "calc-sintaxis.y" /* yacc.c:1909  */
+#line 16 "calc-sintaxis.y" /* yacc.c:1909  */
  struct TreeNode *node;
 
 #line 64 "calc-sintaxis.tab.h" /* yacc.c:1909  */

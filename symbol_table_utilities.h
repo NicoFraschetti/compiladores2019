@@ -2,7 +2,7 @@
 #define SYMBOL_TABLE_H
 #include "types.h"
 
-void add(char *name, int value, int initialized);
+void add(char *name, int value, int initialized, int offset);
 
 Info *findNode(char *name);
 
@@ -14,6 +14,6 @@ void updateTable(char *name, int value);
 
 ListNode *findListNode(char *name);
 
-void insertInTable(char *name, int value, int initialized);
+void insertInTable(char *name, int value, int initialized, int offset);
 
 #endif

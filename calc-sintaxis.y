@@ -7,6 +7,7 @@
 #include "symbol_table_utilities.h"
 #include "ast_utilities.h"
 #include "cod_3D_list_utilities.h"
+#include "offset_generator.h"
 void yyerror(char *);
 int yylex(void);
 
@@ -39,12 +40,12 @@ decls:
 decl:
     VAR ID ';'             {
 
-                                insertInTable($2->info->name,-1,0);
+                                insertInTable($2->info->name,-1,0,getOffSet());
 
 
                            }
     | VAR ID '=' expr ';'  { 
-                                insertInTable($2->info->name,evalTree($4),1);
+                                insertInTable($2->info->name,evalTree($4),1,getOffSet());
                                 $$ = createNode($2,$4,NULL,"asig"); 
                            }
     ;

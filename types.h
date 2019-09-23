@@ -4,6 +4,7 @@
 typedef struct Info {
 	char *name;
 	int value;
+	int offSet;
 } Info;
 
 typedef struct ListNode {

@@ -1,9 +1,8 @@
-var y = 8 % 3;
-var z = 3 * y;
-var x = 3 * z;
-x = x + 1;
+var x = 8;
+var y;
+var z;
+y = x + 3 + 2 + 10 + 22 + 24 + 1 - 5;
+z = x;
 printi (y);
-printi (x);
 printi (z);
-
 
