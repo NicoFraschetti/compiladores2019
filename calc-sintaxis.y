@@ -63,13 +63,14 @@ statement:
                                     $$ = createNode($1,$3,NULL,"asig"); 
                                 }
     | PRINTI '(' expr ')' ';'   {   $$ = createNode($3,NULL,NULL,"printi");
-                                    //printf("resultado es %d\n",evalTree($$->leftChild)); 
+                                    printf("resultado es %d\n",evalTree($$->leftChild)); 
                                 } 
     ; 
 
 expr:
     INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value),"int"); }
-    | ID        { 
+    | ID        {   
+                    //printf("$1->info->offSet=%d, $1->info->name=%s\n", $1->info->offSet, $1->info->name);
                     ListNode *aux = findListNode($1->info->name);
                     if (aux==NULL){
                         printf("Undeclared Variable %s\n", $1->info->name);
@@ -79,6 +80,7 @@ expr:
                         printf("Unitialized Variable %s\n", $1->info->name);
                         exit(1);   
                     }
+                    /*printf("estoy adentro de id! aux->info->offSet=%d, variable=%s\n",aux->info->offSet,aux->info->name);*/
                     $$ = createNode(NULL,NULL,aux->info,"var");
                   
                 }

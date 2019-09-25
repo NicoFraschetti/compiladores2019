@@ -6,6 +6,7 @@
 #include "cod_3D_list_utilities.h"
 #include "ast_utilities.h"
 #include "offset_generator.h"
+#include "symbol_table_utilities.h"
 
 Cod3D *head, *tail;
 
@@ -134,6 +135,8 @@ void printCod3DList(){
 
 void generateAssembly(TreeNode *t, char *fileName){
 	generateCod3DList(t);
+	printCod3DList();
+	printSymbolTable();
 	Cod3D *aux = head; 
 	char *subStr = malloc(strlen(fileName)-3);
 	strncpy(subStr,fileName,strlen(fileName)-4);
@@ -142,10 +145,12 @@ void generateAssembly(TreeNode *t, char *fileName){
 	fprintf(f,"%s\n","	.globl main");
 	fprintf(f,"%s\n","main:");
 	fprintf(f, "	enter	$%d. $0\n", -offSet()+16);
+	int prevOpCod = -1;
 	while (aux != NULL){
 		switch(aux->opCod){
 			case 0:
-				fprintf(f, "	movq	$%d, %d(%rbp)\n", );
+				if (aux->arg2->name == NULL)
+					fprintf(f, "	movq	$%d, %d(%%rbp)\n",aux->arg2->value, aux->arg1->offSet);
 				break;
 			case 1:
 				//Do something
