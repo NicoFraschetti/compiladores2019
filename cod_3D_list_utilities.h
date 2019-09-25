@@ -2,6 +2,8 @@
 #define COD3D_H
 #include "types.h"
 
+void generateAssembly(TreeNode *t, char *fileName);
+
 void insertCod3D(Op opCod, Info *arg1, Info *arg2, Info *res);
 
 Info *generateCod3DList(TreeNode *t);

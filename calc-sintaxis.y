@@ -11,6 +11,8 @@
 void yyerror(char *);
 int yylex(void);
 
+char *getName();
+
 %}
  
 %union { struct TreeNode *node;}
@@ -28,8 +30,7 @@ int yylex(void);
 
 program:
     decls statements   { $$ = createNode($1,$2,NULL,"next");
-                         generateCod3DList($$);
-                         printCod3DList(); 
+                         generateAssembly($$, getName());
                        }
     ;
 
@@ -62,7 +63,7 @@ statement:
                                     $$ = createNode($1,$3,NULL,"asig"); 
                                 }
     | PRINTI '(' expr ')' ';'   {   $$ = createNode($3,NULL,NULL,"printi");
-                                    printf("resultado es %d\n",evalTree($$->leftChild)); 
+                                    //printf("resultado es %d\n",evalTree($$->leftChild)); 
                                 } 
     ; 
 

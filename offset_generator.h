@@ -3,4 +3,6 @@
 
 int getOffSet();
 
+int offSet();
+
 #endif

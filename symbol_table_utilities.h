@@ -16,4 +16,6 @@ ListNode *findListNode(char *name);
 
 void insertInTable(char *name, int value, int initialized, int offset);
 
+void printSymbolTable();
+
 #endif

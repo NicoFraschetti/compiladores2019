@@ -68,4 +68,15 @@ void insertInTable(char *name, int value, int initialized, int offset){
 	add(name,value,initialized,offset);
 }
 
+void printSymbolTable(){
+	ListNode *aux = p;
+	printf("[ ");
+	while (aux != NULL){
+		Info *info = aux->info;
+		printf("(%s,%d), ", info->name, info->offSet);
+		aux = aux->next;
+	}
+	printf("]\n");
+}
+
 #endif

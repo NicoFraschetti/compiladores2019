@@ -84,10 +84,38 @@ Info *generateCod3DList(TreeNode *t) {
 		generateCod3DList(t->rightChild);
 }
 
+char* OpCodName(int opCod){
+	switch(opCod){
+		case 0:
+			return "ASIG";
+			break;
+		case 1:
+			return "ADD";
+			break;
+		case 2:
+			return "MUL";
+			break;
+		case 3:
+			return "SUB";
+			break;
+		case 4:
+			return "DIV";
+			break;
+		case 5:
+			return "MOD";
+			break;
+		case 6:
+			return "PRINT";
+			break;
+		default:
+			return NULL;
+	}
+}
+
 void printCod3DList(){
 	Cod3D *aux = head;
 	while (aux!=NULL){
-		printf("[%d,",aux->opCod);
+		printf("[%s,",OpCodName(aux->opCod));
 		if (aux->arg1!=NULL)
 			printf("(%s,%d,offset=%d),",aux->arg1->name,aux->arg1->value,aux->arg1->offSet);
 		else
@@ -102,6 +130,47 @@ void printCod3DList(){
 			printf("null]\n");
 		aux = aux->next;		
 	}
+}
+
+void generateAssembly(TreeNode *t, char *fileName){
+	generateCod3DList(t);
+	Cod3D *aux = head; 
+	char *subStr = malloc(strlen(fileName)-3);
+	strncpy(subStr,fileName,strlen(fileName)-4);
+	sprintf(fileName,"%s%s",subStr,".s");
+	FILE *f = fopen(fileName,"w");
+	fprintf(f,"%s\n","	.globl main");
+	fprintf(f,"%s\n","main:");
+	fprintf(f, "	enter	$%d. $0\n", -offSet()+16);
+	while (aux != NULL){
+		switch(aux->opCod){
+			case 0:
+				fprintf(f, "	movq	$%d, %d(%rbp)\n", );
+				break;
+			case 1:
+				//Do something
+				break;
+			case 2:
+				//Do something
+				break;
+			case 3:
+				//Do something
+				break;
+			case 4:
+				//Do something
+				break;
+			case 5:
+				//Do something
+				break;
+			case 6:
+				//Do something
+				break;
+		}	
+		aux = aux->next;
+	}
+	fprintf(f, "	%s\n","leave");
+	fprintf(f, "	%s\n","ret");
+	fclose(f);	
 }
 
 #endif

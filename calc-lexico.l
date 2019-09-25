@@ -43,17 +43,26 @@ printi						  { return PRINTI; }
 
 %%
 
+char *fileName;
+
+char *getName(){
+	return fileName;
+}
+
 void yyerror(){
 	printf("%s%d\n","-> ERROR Sintactico en la linea: ",yylineno);
 }
 
 int main(int argc,char *argv[]){
+	char *hola = "hola";
 	++argv,--argc;
-	if (argc > 0)
+	if (argc > 0){
+		fileName = (char *) malloc(sizeof(char)*20);
+		strcpy(fileName,argv[0]);
 		yyin = fopen(argv[0],"r");
+	}
 	else
 		yyin = stdin;
-
 	yyparse();
 
 }
