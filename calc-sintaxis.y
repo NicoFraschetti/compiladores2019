@@ -30,6 +30,7 @@ char *getName();
 
 program:
     decls statements   { $$ = createNode($1,$2,NULL,"next");
+                         printCod3DList();
                          generateAssembly($$, getName());
                        }
     ;
@@ -41,12 +42,12 @@ decls:
 decl:
     VAR ID ';'             {
 
-                                insertInTable($2->info->name,-1,0,getOffSet());
+                                insertInTable($2->info->name,-1,0,$2->info->offSet,"var");
 
 
                            }
     | VAR ID '=' expr ';'  { 
-                                insertInTable($2->info->name,evalTree($4),1,getOffSet());
+                                insertInTable($2->info->name,evalTree($4),1,$2->info->offSet,"var");
                                 $$ = createNode($2,$4,NULL,"asig"); 
                            }
     ;
@@ -68,7 +69,7 @@ statement:
     ; 
 
 expr:
-    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value),"int"); }
+    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
     | ID        {   
                     //printf("$1->info->offSet=%d, $1->info->name=%s\n", $1->info->offSet, $1->info->name);
                     ListNode *aux = findListNode($1->info->name);
@@ -89,7 +90,7 @@ expr:
     | expr '*' expr     {   $$ = createNode($1,$3,NULL,"mul"); }
     | expr '/' expr     {   $$ = createNode($1,$3,NULL,"div"); }
     | expr '%' expr     {   $$ = createNode($1,$3,NULL,"mod"); }
-    | '-' expr          {   Info *info = createNodeInfo(NULL, -1);
+    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1,"int");
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
 

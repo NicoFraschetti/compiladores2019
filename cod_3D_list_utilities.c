@@ -29,8 +29,7 @@ int tmpCount = 0;
 Info *generateNextTmp(){
 	char *name = (char *) malloc(sizeof(char *)*5);
 	sprintf(name,"t%d",tmpCount++);
-	Info *info = createNodeInfo(name,-1);
-	info->offSet = getOffSet();
+	Info *info = createNodeInfo(name,-1,getOffSet(),"temp");
 
 }
 
@@ -39,8 +38,10 @@ Info *generateCod3DList(TreeNode *t) {
 		return NULL;
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->leftChild);
-	if (strcmp(t->label,"int")==0 || strcmp(t->label,"var")==0)
+	if (strcmp(t->label,"int")==0)
 		return t->info;
+	else if (strcmp(t->label,"var")==0)
+		return findNode(t->info->name);
 	else if (strcmp(t->label,"asig")==0){
 		Op opCod = ASIGI;
 		insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
@@ -78,7 +79,7 @@ Info *generateCod3DList(TreeNode *t) {
 	}
 	else if (strcmp(t->label,"printi")==0){
 		Op opCod = PRINT;
-		insertCod3D(opCod,t->leftChild->info,NULL,NULL);
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
 	if (strcmp(t->label,"next")==0)
@@ -136,7 +137,6 @@ void printCod3DList(){
 void generateAssembly(TreeNode *t, char *fileName){
 	generateCod3DList(t);
 	printCod3DList();
-	printSymbolTable();
 	Cod3D *aux = head; 
 	char *subStr = malloc(strlen(fileName)-3);
 	strncpy(subStr,fileName,strlen(fileName)-4);
@@ -144,31 +144,85 @@ void generateAssembly(TreeNode *t, char *fileName){
 	FILE *f = fopen(fileName,"w");
 	fprintf(f,"%s\n","	.globl main");
 	fprintf(f,"%s\n","main:");
-	fprintf(f, "	enter	$%d. $0\n", -offSet()+16);
+	fprintf(f, "	enter	$%d, $0\n", -offSet()+16);
 	int prevOpCod = -1;
 	while (aux != NULL){
 		switch(aux->opCod){
 			case 0:
 				if (aux->arg2->name == NULL)
-					fprintf(f, "	movq	$%d, %d(%%rbp)\n",aux->arg2->value, aux->arg1->offSet);
+					fprintf(f, "	movq	$%d, %d(%%rbp)\n", aux->arg2->value, aux->arg1->offSet);
+				else {
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg2->offSet);
+					fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->arg1->offSet);
+				}
 				break;
 			case 1:
-				//Do something
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
+				if (aux->arg2->name == NULL)
+					fprintf(f, "	addq	$%d, %%rax\n", aux->arg2->value);
+				else 
+					fprintf(f, "	addq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
+				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
 				break;
 			case 2:
-				//Do something
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
+				if (aux->arg2->name == NULL)
+					fprintf(f, "	imulq	$%d, %%rax\n", aux->arg2->value);
+				else 
+					fprintf(f, "	imulq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
+				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
 				break;
 			case 3:
-				//Do something
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
+				if (aux->arg2->name == NULL)
+					fprintf(f, "	subq	$%d, %%rax\n", aux->arg2->value);
+				else 
+					fprintf(f, "	subq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
+				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
 				break;
 			case 4:
-				//Do something
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
+				fprintf(f, "	cltd\n");
+				if (aux->arg2->name == NULL){
+					fprintf(f, "	movq	$%d, %%rbx\n", aux->arg2->value);
+					fprintf(f, "	idivq	%%rbx\n");
+				}
+				else 
+					fprintf(f, "	idivq	%d(%%rbp)\n",aux->arg2->offSet);
+				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
 				break;
 			case 5:
-				//Do something
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
+				fprintf(f, "	cltd\n");
+				if (aux->arg2->name == NULL){
+					fprintf(f, "	movq	$%d, %%rbx\n", aux->arg2->value);
+					fprintf(f, "	idivq	%%rbx\n");
+				}
+				else 
+					fprintf(f, "	idivq	%d(%%rbp)\n",aux->arg2->offSet);
+				fprintf(f, "	movq	%%rdx, %d(%%rbp)\n",aux->result->offSet);
 				break;
 			case 6:
-				//Do something
+					if (aux ->arg1->name == NULL)
+						fprintf(f, "	movq	$%d, %%rdi\n", aux->arg1->value);
+					else
+						fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
+					fprintf(f, "	call	printi\n");
 				break;
 		}	
 		aux = aux->next;

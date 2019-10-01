@@ -488,9 +488,10 @@ char *yytext;
 #include "symbol_table_utilities.h"
 #include "ast_utilities.h"
 #include "calc-sintaxis.tab.h"
+#include "offset_generator.h"
 
-#line 493 "lex.yy.c"
 #line 494 "lex.yy.c"
+#line 495 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -707,10 +708,10 @@ YY_DECL
 		}
 
 	{
-#line 19 "calc-lexico.l"
+#line 20 "calc-lexico.l"
 
 
-#line 714 "lex.yy.c"
+#line 715 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -779,56 +780,58 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 21 "calc-lexico.l"
+#line 22 "calc-lexico.l"
 {	return VAR; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "calc-lexico.l"
+#line 24 "calc-lexico.l"
 { return PRINTI; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 25 "calc-lexico.l"
+#line 26 "calc-lexico.l"
 { 
-								Info *info = createNodeInfo(NULL, atoi(yytext));
+								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 								yylval.node = createNode(NULL,NULL,info,"int");
                                 //printf("INT : %d\n",atoi(yytext)); 
                                 return INT;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "calc-lexico.l"
+#line 32 "calc-lexico.l"
 { char *name = (char *) malloc(sizeof(yytext)*yyleng);
                                 strcpy(name,yytext);
-                                Info *info = createNodeInfo(name,-1);
+                                Info *info = findNode(name);
+                                if (info == NULL)
+                                	info = createNodeInfo(name,-1,getOffSet(),"var");
                                 yylval.node = createNode(NULL,NULL,info,"var");
                                 //printf("ID : %s\n",yytext);
                                 return ID;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 38 "calc-lexico.l"
+#line 41 "calc-lexico.l"
 { return *yytext;}
 	YY_BREAK
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 40 "calc-lexico.l"
+#line 43 "calc-lexico.l"
 ;
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 42 "calc-lexico.l"
+#line 45 "calc-lexico.l"
 ; /* ignore all the rest */
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 44 "calc-lexico.l"
+#line 47 "calc-lexico.l"
 ECHO;
 	YY_BREAK
-#line 832 "lex.yy.c"
+#line 835 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1845,7 +1848,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 44 "calc-lexico.l"
+#line 47 "calc-lexico.l"
 
 
 char *fileName;

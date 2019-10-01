@@ -38,11 +38,12 @@ int eval(){
 	return evalTree(root);
 }
 
-Info *createNodeInfo(char *name, int value){
+Info *createNodeInfo(char *name, int value, int offset, char *label){
 	Info *aux = (Info *) malloc(sizeof(Info));
 	aux->name = name;
 	aux->value = value;
-	aux->offSet = -1;
+	aux->offSet = offset;
+	aux->label = label;
 }
 
 void printTree(TreeNode *t, int n){

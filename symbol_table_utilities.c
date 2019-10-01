@@ -4,18 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symbol_table_utilities.h"
-#include "offset_generator.h"
 
 ListNode *p;
 
-void add(char *name, int value, int initialized, int offset) {
+void add(char *name, int value, int initialized, int offset, char *label) {
 	ListNode *aux = (ListNode *) malloc(sizeof(ListNode));
 	aux->info = (Info *) malloc(sizeof(Info));
 	aux->info->name = (char *) malloc(sizeof(char *)*strlen(name));
 	strcpy(aux->info->name,name);
 	aux->info->value = value;
-	aux->initialized = initialized;
 	aux->info->offSet = offset;
+	aux->info->label = label;
+	aux->initialized = initialized;
 	aux->next = p;
 	p = aux;
 }
@@ -60,12 +60,12 @@ ListNode *findListNode(char *name){
 	return NULL;	
 }
 
-void insertInTable(char *name, int value, int initialized, int offset){
+void insertInTable(char *name, int value, int initialized, int offset, char * label){
 	if (findListNode(name)!=NULL){
 		printf("Variable %s already declared \n",name);
 		exit(1);
 	}
-	add(name,value,initialized,offset);
+	add(name,value,initialized,offset,label);
 }
 
 void printSymbolTable(){

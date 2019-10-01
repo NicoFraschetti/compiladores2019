@@ -7,6 +7,7 @@
 #include "symbol_table_utilities.h"
 #include "ast_utilities.h"
 #include "calc-sintaxis.tab.h"
+#include "offset_generator.h"
 
 %}
 
@@ -23,14 +24,16 @@ var						  	  {	return VAR; }
 printi						  { return PRINTI; }
 
 {digito}+                     { 
-								Info *info = createNodeInfo(NULL, atoi(yytext));
+								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 								yylval.node = createNode(NULL,NULL,info,"int");
                                 //printf("INT : %d\n",atoi(yytext)); 
                                 return INT;}
 
 {letra}({letra}|{digito})*    { char *name = (char *) malloc(sizeof(yytext)*yyleng);
                                 strcpy(name,yytext);
-                                Info *info = createNodeInfo(name,-1);
+                                Info *info = findNode(name);
+                                if (info == NULL)
+                                	info = createNodeInfo(name,-1,getOffSet(),"var");
                                 yylval.node = createNode(NULL,NULL,info,"var");
                                 //printf("ID : %s\n",yytext);
                                 return ID;}
