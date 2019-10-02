@@ -1258,7 +1258,7 @@ yyreduce:
 #line 43 "calc-sintaxis.y" /* yacc.c:1646  */
     {
 
-                                insertInTable((yyvsp[-1].node)->info->name,-1,0,(yyvsp[-1].node)->info->offSet,"var");
+                                insertInTable((yyvsp[-1].node)->info->name,-1,0,(yyvsp[-1].node)->info->offSet);
 
 
                            }
@@ -1268,7 +1268,7 @@ yyreduce:
   case 6:
 #line 49 "calc-sintaxis.y" /* yacc.c:1646  */
     { 
-                                insertInTable((yyvsp[-3].node)->info->name,evalTree((yyvsp[-1].node)),1,(yyvsp[-3].node)->info->offSet,"var");
+                                insertInTable((yyvsp[-3].node)->info->name,evalTree((yyvsp[-1].node)),1,(yyvsp[-3].node)->info->offSet);
                                 (yyval.node) = createNode((yyvsp[-3].node),(yyvsp[-1].node),NULL,"asig"); 
                            }
 #line 1275 "calc-sintaxis.tab.c" /* yacc.c:1646  */
@@ -1293,14 +1293,14 @@ yyreduce:
   case 10:
 #line 66 "calc-sintaxis.y" /* yacc.c:1646  */
     {   (yyval.node) = createNode((yyvsp[-2].node),NULL,NULL,"printi");
-                                    printf("resultado es %d\n",evalTree((yyval.node)->leftChild)); 
+                                    //printf("resultado es %d\n",evalTree($$->leftChild)); 
                                 }
 #line 1299 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
 #line 72 "calc-sintaxis.y" /* yacc.c:1646  */
-    {   (yyval.node) = createNode(NULL,NULL,createNodeInfo(NULL,(yyvsp[0].node)->info->value,-1,"int"),"int"); }
+    {   (yyval.node) = createNode(NULL,NULL,createNodeInfo(NULL,(yyvsp[0].node)->info->value,-1),"int"); }
 #line 1305 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1356,7 +1356,7 @@ yyreduce:
 
   case 18:
 #line 93 "calc-sintaxis.y" /* yacc.c:1646  */
-    {   Info *info = createNodeInfo(NULL, -1,-1,"int");
+    {   Info *info = createNodeInfo(NULL, -1,-1);
                             (yyval.node) = createNode((yyvsp[0].node),createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
 #line 1363 "calc-sintaxis.tab.c" /* yacc.c:1646  */

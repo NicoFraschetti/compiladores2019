@@ -7,14 +7,13 @@
 
 ListNode *p;
 
-void add(char *name, int value, int initialized, int offset, char *label) {
+void add(char *name, int value, int initialized, int offset) {
 	ListNode *aux = (ListNode *) malloc(sizeof(ListNode));
 	aux->info = (Info *) malloc(sizeof(Info));
 	aux->info->name = (char *) malloc(sizeof(char *)*strlen(name));
 	strcpy(aux->info->name,name);
 	aux->info->value = value;
 	aux->info->offSet = offset;
-	aux->info->label = label;
 	aux->initialized = initialized;
 	aux->next = p;
 	p = aux;
@@ -60,12 +59,12 @@ ListNode *findListNode(char *name){
 	return NULL;	
 }
 
-void insertInTable(char *name, int value, int initialized, int offset, char * label){
+void insertInTable(char *name, int value, int initialized, int offset){
 	if (findListNode(name)!=NULL){
 		printf("Variable %s already declared \n",name);
 		exit(1);
 	}
-	add(name,value,initialized,offset,label);
+	add(name,value,initialized,offset);
 }
 
 void printSymbolTable(){

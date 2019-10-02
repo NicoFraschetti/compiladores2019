@@ -42,12 +42,12 @@ decls:
 decl:
     VAR ID ';'             {
 
-                                insertInTable($2->info->name,-1,0,$2->info->offSet,"var");
+                                insertInTable($2->info->name,-1,0,$2->info->offSet);
 
 
                            }
     | VAR ID '=' expr ';'  { 
-                                insertInTable($2->info->name,evalTree($4),1,$2->info->offSet,"var");
+                                insertInTable($2->info->name,evalTree($4),1,$2->info->offSet);
                                 $$ = createNode($2,$4,NULL,"asig"); 
                            }
     ;
@@ -64,12 +64,12 @@ statement:
                                     $$ = createNode($1,$3,NULL,"asig"); 
                                 }
     | PRINTI '(' expr ')' ';'   {   $$ = createNode($3,NULL,NULL,"printi");
-                                    printf("resultado es %d\n",evalTree($$->leftChild)); 
+                                    //printf("resultado es %d\n",evalTree($$->leftChild)); 
                                 } 
     ; 
 
 expr:
-    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
+    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1),"int"); }
     | ID        {   
                     //printf("$1->info->offSet=%d, $1->info->name=%s\n", $1->info->offSet, $1->info->name);
                     ListNode *aux = findListNode($1->info->name);
@@ -90,7 +90,7 @@ expr:
     | expr '*' expr     {   $$ = createNode($1,$3,NULL,"mul"); }
     | expr '/' expr     {   $$ = createNode($1,$3,NULL,"div"); }
     | expr '%' expr     {   $$ = createNode($1,$3,NULL,"mod"); }
-    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1,"int");
+    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1);
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
 

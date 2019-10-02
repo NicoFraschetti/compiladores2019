@@ -29,7 +29,7 @@ int tmpCount = 0;
 Info *generateNextTmp(){
 	char *name = (char *) malloc(sizeof(char *)*5);
 	sprintf(name,"t%d",tmpCount++);
-	Info *info = createNodeInfo(name,-1,getOffSet(),"temp");
+	Info *info = createNodeInfo(name,-1,getOffSet());
 
 }
 
@@ -136,7 +136,6 @@ void printCod3DList(){
 
 void generateAssembly(TreeNode *t, char *fileName){
 	generateCod3DList(t);
-	printCod3DList();
 	Cod3D *aux = head; 
 	char *subStr = malloc(strlen(fileName)-3);
 	strncpy(subStr,fileName,strlen(fileName)-4);
@@ -145,7 +144,6 @@ void generateAssembly(TreeNode *t, char *fileName){
 	fprintf(f,"%s\n","	.globl main");
 	fprintf(f,"%s\n","main:");
 	fprintf(f, "	enter	$%d, $0\n", -offSet()+16);
-	int prevOpCod = -1;
 	while (aux != NULL){
 		switch(aux->opCod){
 			case 0:
