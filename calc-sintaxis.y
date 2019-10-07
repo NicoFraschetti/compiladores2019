@@ -35,8 +35,8 @@ char *currentType;
 
 program:
     decls statements   { $$ = createNode($1,$2,NULL,"next");
-                         generateDot($$, getName());
-                         //generateAssembly($$, getName());
+                         generateDot($$,"dot_output");
+                         generateAssembly($$,getName());
                        }
     ;
 

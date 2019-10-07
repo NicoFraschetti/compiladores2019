@@ -1266,8 +1266,8 @@ yyreduce:
         case 2:
 #line 37 "calc-sintaxis.y" /* yacc.c:1646  */
     { (yyval.node) = createNode((yyvsp[-1].node),(yyvsp[0].node),NULL,"next");
-                         generateDot((yyval.node), getName());
-                         //generateAssembly($$, getName());
+                         generateDot((yyval.node),"dot_output");
+                         generateAssembly((yyval.node),getName());
                        }
 #line 1273 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;

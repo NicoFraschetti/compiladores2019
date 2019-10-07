@@ -1910,7 +1910,6 @@ void yyerror(){
 }
 
 int main(int argc,char *argv[]){
-	char *hola = "hola";
 	++argv,--argc;
 	if (argc > 0){
 		fileName = (char *) malloc(sizeof(char)*20);

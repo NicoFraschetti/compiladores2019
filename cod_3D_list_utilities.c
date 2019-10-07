@@ -137,10 +137,10 @@ void printCod3DList(){
 void generateAssembly(TreeNode *t, char *fileName){
 	generateCod3DList(t);
 	Cod3D *aux = head; 
-	char *subStr = malloc(strlen(fileName)-3);
-	strncpy(subStr,fileName,strlen(fileName)-4);
-	sprintf(fileName,"%s%s",subStr,".s");
-	FILE *f = fopen(fileName,"w");
+	char *subStr = malloc(sizeof(char)*31);
+	strncpy(subStr,fileName,strlen(fileName)-3);
+	strcat(subStr,"s");
+	FILE *f = fopen(subStr,"w");
 	fprintf(f,"%s\n","	.globl main");
 	fprintf(f,"%s\n","main:");
 	fprintf(f, "	enter	$%d, $0\n", -offSet()+16);

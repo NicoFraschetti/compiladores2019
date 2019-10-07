@@ -146,10 +146,10 @@ void generateDot2(TreeNode *t, FILE *f, char *parentName){
 }
 
 void generateDot(TreeNode *t, char *fileName){
-	char *subStr = malloc(strlen(fileName)-3);
-	strncpy(subStr,fileName,strlen(fileName)-4);
-	sprintf(fileName,"%s%s",subStr,".dot");
-	FILE *f = fopen(fileName,"w");
+	char *subStr = malloc(strlen(fileName)+4);
+	strcpy(subStr,fileName);
+	sprintf(subStr,"%s%s",fileName,".dot");
+	FILE *f = fopen(subStr,"w");
 	char * rootName = generateNextName(t);
 	fprintf(f, "digraph{\n");
 	fprintf(f, "inic[shape=point];\n");
