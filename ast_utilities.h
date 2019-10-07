@@ -14,4 +14,6 @@ void printTree(TreeNode *t, int n);
 
 void printTree2(TreeNode *t, int n, char *s);
 
+void generateDot(TreeNode *t,char *fileName);
+
 #endif

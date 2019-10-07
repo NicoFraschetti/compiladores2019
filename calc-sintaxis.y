@@ -13,15 +13,20 @@ int yylex(void);
 
 char *getName();
 
+char *currentType;
+
 %}
  
 %union { struct TreeNode *node;}
  
 %token<node> INT ID PRINTI
-%token VAR
+%token VAR AND OR INTEGER BOOL TRUE FALSE
 
 %type<node> program decls decl statements statement expr
- 
+
+%left AND OR
+%left '!'
+%left EQ '>' '<' 
 %left '+' '-' 
 %left '*' '/' '%'
 
@@ -30,8 +35,8 @@ char *getName();
 
 program:
     decls statements   { $$ = createNode($1,$2,NULL,"next");
-                         printCod3DList();
-                         generateAssembly($$, getName());
+                         generateDot($$, getName());
+                         //generateAssembly($$, getName());
                        }
     ;
 
@@ -40,15 +45,15 @@ decls:
     |                      {    $$ = NULL; }
     ;
 decl:
-    VAR ID ';'             {
+    VAR type ID ';'        {
 
-                                insertInTable($2->info->name,-1,0,$2->info->offSet);
-
+                                insertInTable($3->info->name,-1,0,$3->info->offSet,currentType);
+                                $$ = NULL;
 
                            }
-    | VAR ID '=' expr ';'  { 
-                                insertInTable($2->info->name,evalTree($4),1,$2->info->offSet);
-                                $$ = createNode($2,$4,NULL,"asig"); 
+    | VAR type ID '=' expr ';'  { 
+                                insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType);
+                                $$ = createNode($3,$5,NULL,"asig"); 
                            }
     ;
 
@@ -81,10 +86,10 @@ expr:
                         printf("Unitialized Variable %s\n", $1->info->name);
                         exit(1);   
                     }
-                    /*printf("estoy adentro de id! aux->info->offSet=%d, variable=%s\n",aux->info->offSet,aux->info->name);*/
                     $$ = createNode(NULL,NULL,aux->info,"var");
-                  
                 }
+    | TRUE              {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,1,-1),"bool"); }
+    | FALSE             {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,0,-1),"bool"); }
     | expr '+' expr     {   $$ = createNode($1,$3,NULL,"add"); }
     | expr '-' expr     {   $$ = createNode($1,$3,NULL,"sub"); }
     | expr '*' expr     {   $$ = createNode($1,$3,NULL,"mul"); }
@@ -94,7 +99,18 @@ expr:
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
 
-    | '(' expr ')'      { $$ = $2; }
+    | '(' expr ')'      {  $$ = $2; }
+    | expr '<' expr     {  $$ = createNode($1,$3,NULL,"less"); }
+    | expr '>' expr     {  $$ = createNode($1,$3,NULL,"greater"); }
+    | expr EQ expr      {  $$ = createNode($1,$3,NULL,"equal"); }
+    | expr AND expr     {  $$ = createNode($1,$3,NULL,"and"); }
+    | expr OR expr      {  $$ = createNode($1,$3,NULL,"or"); }
+    | '!' expr          {  $$ = createNode($2,NULL,NULL,"not"); }
+
+    ;
+type:
+    INTEGER             {   currentType = "integer";    }
+    | BOOL              {   currentType = "bool";       }
     ;
 
 %%

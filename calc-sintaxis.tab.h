@@ -48,7 +48,14 @@ extern int yydebug;
     INT = 258,
     ID = 259,
     PRINTI = 260,
-    VAR = 261
+    VAR = 261,
+    AND = 262,
+    OR = 263,
+    INTEGER = 264,
+    BOOL = 265,
+    TRUE = 266,
+    FALSE = 267,
+    EQ = 268
   };
 #endif
 
@@ -57,10 +64,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 18 "calc-sintaxis.y" /* yacc.c:1909  */
+#line 20 "calc-sintaxis.y" /* yacc.c:1909  */
  struct TreeNode *node;
 
-#line 64 "calc-sintaxis.tab.h" /* yacc.c:1909  */
+#line 71 "calc-sintaxis.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

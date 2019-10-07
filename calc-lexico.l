@@ -23,6 +23,14 @@ var						  	  {	return VAR; }
 
 printi						  { return PRINTI; }
 
+true						  { return TRUE; }
+
+false						  { return FALSE; }
+
+int 						  { return INTEGER; }
+
+bool						  { return BOOL; }
+
 {digito}+                     { 
 								Info *info = createNodeInfo(NULL, atoi(yytext),-1);
 								yylval.node = createNode(NULL,NULL,info,"int");
@@ -38,7 +46,13 @@ printi						  { return PRINTI; }
                                 //printf("ID : %s\n",yytext);
                                 return ID;}
 
-[-+*/%;()=]                   	  { return *yytext;}
+[-+*/%;()=,!,>,<]              { return *yytext;}
+
+"&&"							   { return AND; }
+
+"||"							   { return OR;	 }
+
+"=="							   { return EQ;	 }	
 
 "//".*\n                      ;
 

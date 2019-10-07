@@ -1,19 +1,27 @@
 	.globl main
 main:
-	enter	$48, $0
-	movq	$9, -8(%rbp)
+	enter	$64, $0
+	movq	$2, %rax
+	addq	$3, %rax
+	movq	%rax, -24(%rbp)
+	movq	-24(%rbp), %rax
+	movq	%rax, -8(%rbp)
 	movq	-8(%rbp), %rax
+	imulq	$6, %rax
+	movq	%rax, -32(%rbp)
+	movq	-32(%rbp), %rax
+	movq	%rax, -16(%rbp)
+	movq	-16(%rbp), %rax
 	cltd
 	movq	$2, %rbx
 	idivq	%rbx
-	movq	%rax, -24(%rbp)
-	movq	-24(%rbp), %rax
-	movq	%rax, -16(%rbp)
+	movq	%rax, -48(%rbp)
 	movq	-8(%rbp), %rax
-	cltd
-	idivq	-16(%rbp)
-	movq	%rdx, -32(%rbp)
-	movq	-32(%rbp), %rdi
+	addq	-48(%rbp), %rax
+	movq	%rax, -40(%rbp)
+	movq	-40(%rbp), %rax
+	movq	%rax, -8(%rbp)
+	movq	-8(%rbp), %rdi
 	call	printi
 	leave
 	ret

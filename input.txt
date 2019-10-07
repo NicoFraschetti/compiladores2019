@@ -1,3 +1,4 @@
-var x = 9;
-var y = x / 2;
-printi (x % y);
+var int x = 2 + 3;
+var int y = x * 6;
+x = x + (y/2);
+printi(x);
