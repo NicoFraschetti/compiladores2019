@@ -35,8 +35,11 @@ char *currentType;
 
 program:
     decls statements   { $$ = createNode($1,$2,NULL,"next");
-                         generateDot($$,"dot_output");
+                         //printf("Synstax tree type = %s \n", checkTypesCorrectnes($$));
+                         //generateDot($$,"dot_output");
                          generateAssembly($$,getName());
+                         //generateCod3DList($$);
+                         //printCod3DList();
                        }
     ;
 
@@ -74,7 +77,7 @@ statement:
     ; 
 
 expr:
-    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1),"int"); }
+    INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
     | ID        {   
                     //printf("$1->info->offSet=%d, $1->info->name=%s\n", $1->info->offSet, $1->info->name);
                     ListNode *aux = findListNode($1->info->name);
@@ -88,14 +91,14 @@ expr:
                     }
                     $$ = createNode(NULL,NULL,aux->info,"var");
                 }
-    | TRUE              {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,1,-1),"bool"); }
-    | FALSE             {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,0,-1),"bool"); }
+    | TRUE              {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,1,-1,"bool"),"bool"); }
+    | FALSE             {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,0,-1,"bool"),"bool"); }
     | expr '+' expr     {   $$ = createNode($1,$3,NULL,"add"); }
     | expr '-' expr     {   $$ = createNode($1,$3,NULL,"sub"); }
     | expr '*' expr     {   $$ = createNode($1,$3,NULL,"mul"); }
     | expr '/' expr     {   $$ = createNode($1,$3,NULL,"div"); }
     | expr '%' expr     {   $$ = createNode($1,$3,NULL,"mod"); }
-    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1);
+    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1,"int");
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
 
@@ -109,7 +112,7 @@ expr:
 
     ;
 type:
-    INTEGER             {   currentType = "integer";    }
+    INTEGER             {   currentType = "int";    }
     | BOOL              {   currentType = "bool";       }
     ;
 

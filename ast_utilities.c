@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "symbol_table_utilities.h"
 #include "ast_utilities.h"
 #include "offset_generator.h"
 
@@ -18,6 +19,131 @@ TreeNode *createNode(TreeNode *lft, TreeNode *rgt, Info *info, char * lbl){
 	return root; 
 }
 
+char *checkTypesCorrectnes(TreeNode *t){
+	if (t == NULL)
+		return NULL;
+	if (strcmp(t->label,"next")==0)
+		checkTypesCorrectnes(t->leftChild);
+	else if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0){
+		return t->label;
+	}
+	else if (strcmp(t->label,"var")==0){
+		return findNode(t->info->name)->type;
+	}
+	else if (strcmp(t->label,"asig")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,rightChildType)!=0){
+			printf("leftChildType=%s\n",leftChildType);
+			printf("Assignment error\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"printi")==0)
+		return checkTypesCorrectnes(t->leftChild);
+	else if (strcmp(t->label,"add")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in addition\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"sub")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in substraction\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"mul")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in multiplication\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"div")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in division\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"mod")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in mod\n");
+			exit(1);
+		}
+		return leftChildType;
+	}
+	else if (strcmp(t->label,"less")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in comparison\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"greater")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"int")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in comparison\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"equal")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in comparison\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"and")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"bool")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in and operation\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"or")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,"bool")!=0 || strcmp(leftChildType,rightChildType)!=0){
+			printf("Type error in or operation\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"not")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		if (strcmp(leftChildType,"bool")!=0){
+			printf("Type error in not operation\n");
+			exit(1);
+		}
+		return "bool";
+	}
+	if (strcmp(t->label,"next")==0)
+		checkTypesCorrectnes(t->rightChild);
+
+}
 int evalTree(TreeNode *t){
 	
 	if (strcmp(t->label,"int")==0 || strcmp(t->label,"var")==0)
@@ -38,11 +164,13 @@ int eval(){
 	return evalTree(root);
 }
 
-Info *createNodeInfo(char *name, int value, int offset){
+Info *createNodeInfo(char *name, int value, int offset, char *type){
 	Info *aux = (Info *) malloc(sizeof(Info));
 	aux->name = name;
 	aux->value = value;
 	aux->offSet = offset;
+	aux->type = type;
+	return aux;
 }
 
 void printTree(TreeNode *t, int n){

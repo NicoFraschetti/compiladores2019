@@ -1,4 +1,2 @@
-var int x = 2 + 3;
-var int y = x * 6;
-x = x + (y/2);
-printi(x);
+var bool x = 100 < 500 || 1 + 4 + 5 < 5;
+printi (x || (x && !x));

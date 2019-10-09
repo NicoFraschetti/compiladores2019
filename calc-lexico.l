@@ -32,7 +32,7 @@ int 						  { return INTEGER; }
 bool						  { return BOOL; }
 
 {digito}+                     { 
-								Info *info = createNodeInfo(NULL, atoi(yytext),-1);
+								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 								yylval.node = createNode(NULL,NULL,info,"int");
                                 //printf("INT : %d\n",atoi(yytext)); 
                                 return INT;}
@@ -41,7 +41,7 @@ bool						  { return BOOL; }
                                 strcpy(name,yytext);
                                 Info *info = findNode(name);
                                 if (info == NULL)
-                                	info = createNodeInfo(name,-1,getOffSet());
+                                	info = createNodeInfo(name,-1,getOffSet(),"var");
                                 yylval.node = createNode(NULL,NULL,info,"var");
                                 //printf("ID : %s\n",yytext);
                                 return ID;}

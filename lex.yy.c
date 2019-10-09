@@ -825,7 +825,7 @@ case 7:
 YY_RULE_SETUP
 #line 34 "calc-lexico.l"
 { 
-								Info *info = createNodeInfo(NULL, atoi(yytext),-1);
+								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 								yylval.node = createNode(NULL,NULL,info,"int");
                                 //printf("INT : %d\n",atoi(yytext)); 
                                 return INT;}
@@ -837,7 +837,7 @@ YY_RULE_SETUP
                                 strcpy(name,yytext);
                                 Info *info = findNode(name);
                                 if (info == NULL)
-                                	info = createNodeInfo(name,-1,getOffSet());
+                                	info = createNodeInfo(name,-1,getOffSet(),"var");
                                 yylval.node = createNode(NULL,NULL,info,"var");
                                 //printf("ID : %s\n",yytext);
                                 return ID;}

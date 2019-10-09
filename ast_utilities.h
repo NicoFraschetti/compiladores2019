@@ -8,7 +8,9 @@ int evalTree(TreeNode *t);
 
 int eval();
 
-Info *createNodeInfo(char *name, int value, int offset);
+char *checkTypesCorrectnes(TreeNode *t);
+
+Info *createNodeInfo(char *name, int value, int offset, char* type);
 
 void printTree(TreeNode *t, int n);
 

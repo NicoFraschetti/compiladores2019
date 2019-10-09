@@ -30,7 +30,13 @@ typedef enum {
 	SUBI,
 	DIVI,
 	MODI,
-	PRINT,	
+	PRINT,
+	LESS,
+	GREATER,
+	EQUAL,
+	ANDB,
+	ORB,
+	NOTB	
 } Op;
 
 typedef struct Cod3D {
