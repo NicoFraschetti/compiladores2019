@@ -55,7 +55,10 @@ extern int yydebug;
     BOOL = 265,
     TRUE = 266,
     FALSE = 267,
-    EQ = 268
+    WHILE = 268,
+    IF = 269,
+    ELSE = 270,
+    EQ = 271
   };
 #endif
 
@@ -67,7 +70,7 @@ union YYSTYPE
 #line 20 "calc-sintaxis.y" /* yacc.c:1909  */
  struct TreeNode *node;
 
-#line 71 "calc-sintaxis.tab.h" /* yacc.c:1909  */
+#line 74 "calc-sintaxis.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

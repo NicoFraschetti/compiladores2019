@@ -16,6 +16,7 @@ void insertCod3D(Op opCod, Info *arg1, Info *arg2, Info *res) {
 	aux->arg1 = arg1;
 	aux->arg2 = arg2;
 	aux->result = res;
+	aux->next = NULL;
 	if (head == NULL)
 		head = tail = aux;
 	else{

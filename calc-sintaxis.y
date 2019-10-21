@@ -20,9 +20,9 @@ char *currentType;
 %union { struct TreeNode *node;}
  
 %token<node> INT ID PRINTI
-%token VAR AND OR INTEGER BOOL TRUE FALSE
+%token VAR AND OR INTEGER BOOL TRUE FALSE WHILE IF ELSE
 
-%type<node> program decls decl statements statement expr
+%type<node> program decls decl statements statement expr block  
 
 %left AND OR
 %left '!'
@@ -33,14 +33,18 @@ char *currentType;
  
 %%
 
-program:
-    decls statements   { $$ = createNode($1,$2,NULL,"next");
-                         //printf("Synstax tree type = %s \n", checkTypesCorrectnes($$));
-                         //generateDot($$,"dot_output");
-                         generateAssembly($$,getName());
-                         //generateCod3DList($$);
-                         //printCod3DList();
+prog:
+    program            {
+                            //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
+                            generateDot($1,"dot_output.dot");
+                            //printSymbolTable();
+                            //generateAssembly($1,getName());
+                            generateCod3DList($1);
+                            printCod3DList();
                        }
+
+program:
+    decls statements       {    $$ = createNode($1,$2,NULL,"next"); }
     ;
 
 decls: 
@@ -62,7 +66,7 @@ decl:
 
 statements:
     statements statement        {   $$ = createNode($1,$2,NULL,"next"); }
-    | statement                 
+    |                           {   $$ = NULL; }                 
     ;
 
 statement: 
@@ -73,8 +77,15 @@ statement:
                                 }
     | PRINTI '(' expr ')' ';'   {   $$ = createNode($3,NULL,NULL,"printi");
                                     //printf("resultado es %d\n",evalTree($$->leftChild)); 
-                                } 
+                                }
+    | IF '(' expr ')' block ELSE block {    $$ = createNode($3,createNode($5,$7,NULL,"if_else"),NULL,"if"); }
+    | IF '(' expr ')' block            {    $$ = createNode($3,$5,NULL,"if"); }
+    | WHILE '(' expr ')' block         {    $$ = createNode($3,$5,NULL,"while"); }
     ; 
+
+block: 
+    '{' program '}' { $$ = $2; }
+    ;
 
 expr:
     INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
@@ -101,7 +112,6 @@ expr:
     | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1,"int");
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
-
     | '(' expr ')'      {  $$ = $2; }
     | expr '<' expr     {  $$ = createNode($1,$3,NULL,"less"); }
     | expr '>' expr     {  $$ = createNode($1,$3,NULL,"greater"); }

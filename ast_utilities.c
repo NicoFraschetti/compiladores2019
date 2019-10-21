@@ -218,6 +218,9 @@ int orCount = 0;
 int notCount = 0;
 int printiCount = 0;
 int printbCount = 0;
+int ifCount = 0;
+int ifElseCount = 0;
+int whileCount = 0;
 
 char *generateNextName(TreeNode *t){
 	char *name = (char *) malloc(sizeof(char *)*10);
@@ -261,6 +264,12 @@ char *generateNextName(TreeNode *t){
 		else
 			sprintf(name,"true%d",trueCount++);
 	}
+	else if (strcmp(t->label,"if")==0)
+		sprintf(name,"if%d",ifCount++);
+	else if (strcmp(t->label,"if_else")==0)
+		sprintf(name,"if_else%d",ifElseCount++);
+	else if (strcmp(t->label,"while")==0)
+		sprintf(name,"while%d",whileCount++);
 	return name;
 }
 
@@ -274,10 +283,7 @@ void generateDot2(TreeNode *t, FILE *f, char *parentName){
 }
 
 void generateDot(TreeNode *t, char *fileName){
-	char *subStr = malloc(strlen(fileName)+4);
-	strcpy(subStr,fileName);
-	sprintf(subStr,"%s%s",fileName,".dot");
-	FILE *f = fopen(subStr,"w");
+	FILE *f = fopen(fileName,"w");
 	char * rootName = generateNextName(t);
 	fprintf(f, "digraph{\n");
 	fprintf(f, "inic[shape=point];\n");

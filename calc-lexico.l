@@ -31,6 +31,12 @@ int 						  { return INTEGER; }
 
 bool						  { return BOOL; }
 
+while						  {	return WHILE; }
+
+if 							  { return IF; }
+
+else  						  { return ELSE; }
+
 {digito}+                     { 
 								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 								yylval.node = createNode(NULL,NULL,info,"int");
@@ -46,7 +52,7 @@ bool						  { return BOOL; }
                                 //printf("ID : %s\n",yytext);
                                 return ID;}
 
-[-+*/%;()=,!,>,<]              { return *yytext;}
+[-+*/%;()=!><{}]              { return *yytext;}
 
 "&&"							   { return AND; }
 
