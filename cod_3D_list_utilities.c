@@ -7,6 +7,7 @@
 #include "ast_utilities.h"
 #include "offset_generator.h"
 #include "symbol_table_utilities.h"
+#include "label_stack.h"
 
 Cod3D *head, *tail;
 
@@ -32,6 +33,14 @@ Info *generateNextTmp(char *type){
 	sprintf(name,"t%d",tmpCount++);
 	Info *info = createNodeInfo(name,-1,getOffSet(),type);
 	return info;
+}
+
+int lblCount = 0;
+
+char *generateNextLabel(){
+	char *name = (char *) malloc(sizeof(char *)*5);
+	sprintf(name,".L%d",lblCount++);
+	return name;
 }
 
 Info *generateCod3DList(TreeNode *t) {
@@ -107,12 +116,45 @@ Info *generateCod3DList(TreeNode *t) {
 		Info *res = generateNextTmp("bool");
 		insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),res);
 		return res;
-	}
+	}	
 	else if (strcmp(t->label,"not")==0){
 		Op opCod = NOTB;
 		Info *res = generateNextTmp("bool");
 		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,res);
 		return res;
+	}
+	else if (strcmp(t->label,"if")==0){
+		Op opCod = IF_SENTENCE;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
+		if (strcmp(t->rightChild->label,"if_else")!=0){
+			Op opCod = THEN_SENTENCE;
+			insertCod3D(opCod,NULL,NULL,NULL);	
+		}
+		generateCod3DList(t->rightChild);
+		opCod = ENDIF;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		//insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
+		return NULL;
+	}
+	else if (strcmp(t->label,"if_else")==0){
+		Op opCod = THEN_SENTENCE;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		generateCod3DList(t->leftChild);
+		opCod = ELSE_SENTENCE;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		generateCod3DList(t->rightChild);		
+		//insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
+		return NULL;
+	}
+	else if (strcmp(t->label,"while")==0){
+		Op opCod = WHILE_SENTENCE;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		generateCod3DList(t->rightChild);
+		opCod = MIDWHILE;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		opCod = ENDWHILE;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
+		return NULL;
 	}
 	else if (strcmp(t->label,"printi")==0){
 		Op opCod = PRINT;
@@ -164,6 +206,27 @@ char* OpCodName(int opCod){
 		case 12:
 			return "NOT";
 			break;
+		case 13:
+			return "IF";
+			break;
+		case 14:
+			return "THEN";
+			break;
+		case 15:
+			return "ELSE";
+			break;
+		case 16:
+			return "WHILE";
+			break;
+		case 17:
+			return "ENDIF";
+			break;
+		case 18:
+			return "MIDWHILE";
+			break;
+		case 19:
+			return "ENDWHILE";
+			break;
 		default:
 			return NULL;
 	}
@@ -199,6 +262,7 @@ void generateAssembly(TreeNode *t, char *fileName){
 	fprintf(f,"%s\n","	.globl main");
 	fprintf(f,"%s\n","main:");
 	fprintf(f, "	enter	$%d, $0\n", -offSet()+16);
+	char *else_lbl, *endif_lbl;
 	while (aux != NULL){
 		switch(aux->opCod){
 			case 0:	//asig
@@ -353,7 +417,65 @@ void generateAssembly(TreeNode *t, char *fileName){
 				fprintf(f, "	movzbl	%%al, %%eax\n");
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->result->offSet);
 				break;
-			
+			case 13: //if
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
+				fprintf(f, "	cmpq	$0, %%r10\n");
+				else_lbl = generateNextLabel();
+				fprintf(f, "	je	    %s\n", else_lbl);
+				LabelPair *p = (LabelPair *) malloc(sizeof(LabelPair));
+				p->else_tag = (char *) malloc(sizeof(else_lbl));
+				strcpy(p->else_tag,else_lbl);
+				p->endif_tag = NULL;
+				push(p);
+				break;
+			case 14: //then
+				break;
+			case 15: //else
+				endif_lbl = generateNextLabel();
+				fprintf(f, "	jmp	%s\n", endif_lbl);
+				p = top();
+				p->endif_tag = (char *) malloc(sizeof(endif_lbl));
+				strcpy(p->endif_tag,endif_lbl);
+				fprintf(f,"%s:\n",p->else_tag);
+				break;
+			case 16: //while
+				else_lbl = generateNextLabel();
+				endif_lbl = generateNextLabel();
+				p = (LabelPair *) malloc(sizeof(LabelPair));
+				p->else_tag = (char *) malloc(sizeof(else_lbl));
+				strcpy(p->else_tag,else_lbl);
+				p->endif_tag = (char *) malloc(sizeof(endif_lbl));
+				strcpy(p->endif_tag,endif_lbl);
+				push(p);
+				fprintf(f, "	jmp		%s\n", p->else_tag);
+				fprintf(f, "%s:\n", p->endif_tag);
+				break;
+			case 17: //endif
+				p = top();
+				pop();
+				if (p->endif_tag == NULL)
+					fprintf(f, "%s:\n", p->else_tag);
+				else
+					fprintf(f, "%s:\n", p->endif_tag);
+				break;
+			case 18: //midwhile
+				p = top();
+				fprintf(f, "%s:\n", p->else_tag);
+				break;
+			case 19: //endwhile
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
+				fprintf(f, "	cmpq	$1, %%r10\n");
+				p = top();
+				pop();
+				fprintf(f, "	je 		%s\n", p->endif_tag);
+				break;
+
 		}	
 		aux = aux->next;
 	}

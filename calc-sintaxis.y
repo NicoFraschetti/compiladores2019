@@ -38,9 +38,9 @@ prog:
                             //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
                             generateDot($1,"dot_output.dot");
                             //printSymbolTable();
-                            //generateAssembly($1,getName());
-                            generateCod3DList($1);
-                            printCod3DList();
+                            generateAssembly($1,getName());
+                            //generateCod3DList($1);
+                            //printCod3DList();
                        }
 
 program:

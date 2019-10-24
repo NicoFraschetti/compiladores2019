@@ -1294,9 +1294,9 @@ yyreduce:
                             //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
                             generateDot((yyvsp[0].node),"dot_output.dot");
                             //printSymbolTable();
-                            //generateAssembly($1,getName());
-                            generateCod3DList((yyvsp[0].node));
-                            printCod3DList();
+                            generateAssembly((yyvsp[0].node),getName());
+                            //generateCod3DList($1);
+                            //printCod3DList();
                        }
 #line 1302 "calc-sintaxis.tab.c" /* yacc.c:1646  */
     break;

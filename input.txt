@@ -1,0 +1,14 @@
+//fibonacci hasta 30
+var int i = 0;
+var int j = 1;
+var int k = 1;
+var int n = 30;
+while (k < n){
+	var int t;
+	t = i + j;
+	i = j;
+	j = t;
+	k = k + 1;
+	printi (i);
+}
+//printi (j);

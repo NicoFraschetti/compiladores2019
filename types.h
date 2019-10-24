@@ -36,7 +36,14 @@ typedef enum {
 	EQUAL,
 	ANDB,
 	ORB,
-	NOTB	
+	NOTB,
+	IF_SENTENCE,
+	THEN_SENTENCE,
+	ELSE_SENTENCE,
+	WHILE_SENTENCE,
+	ENDIF,
+	MIDWHILE,
+	ENDWHILE	
 } Op;
 
 typedef struct Cod3D {
@@ -46,5 +53,15 @@ typedef struct Cod3D {
 	Info *result;
 	struct Cod3D *next;
 } Cod3D;
+
+typedef struct LabelPair {
+	char *else_tag;
+	char *endif_tag;
+} LabelPair;
+
+typedef struct StackNode {
+	LabelPair *pair;
+	struct StackNode *next; 
+} StackNode;
 
 #endif
