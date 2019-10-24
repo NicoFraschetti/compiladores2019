@@ -85,6 +85,7 @@ statement:
 
 block: 
     '{' program '}' { $$ = $2; }
+    | ';'           { $$ = createNode(NULL,NULL,NULL,"next"); }
     ;
 
 expr:
