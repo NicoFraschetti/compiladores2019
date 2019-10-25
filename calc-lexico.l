@@ -3,11 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "types.h"
-#include "symbol_table_utilities.h"
-#include "ast_utilities.h"
+#include "util/ast_utilities.h"
+#include "util/symbol_table_utilities.h"
+#include "util/offset_generator.h"
 #include "calc-sintaxis.tab.h"
-#include "offset_generator.h"
 
 %}
 
@@ -19,50 +18,51 @@ digito [0-9]
 
 %%
 
-var						  	  {	return VAR; }
+var						  	  	{ 	return VAR; 	}
 
-printi						  { return PRINTI; }
+printi						  	{ 	return PRINTI; 	}
 
-true						  { return TRUE; }
+true						  	{ 	return TRUE; 	}
 
-false						  { return FALSE; }
+false						  	{ 	return FALSE; 	}
 
-int 						  { return INTEGER; }
+int 						  	{ 	return INTEGER; }
 
-bool						  { return BOOL; }
+bool						  	{ 	return BOOL; 	}
 
-while						  {	return WHILE; }
+while						  	{ 	return WHILE; 	}
 
-if 							  { return IF; }
+if 							  	{	return IF;		}
 
-else  						  { return ELSE; }
+else  						  	{	return ELSE;	}
 
-{digito}+                     { 
-								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
-								yylval.node = createNode(NULL,NULL,info,"int");
-                                //printf("INT : %d\n",atoi(yytext)); 
-                                return INT;}
+{digito}+                     	{ 
+									Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
+									yylval.node = createNode(NULL,NULL,info,"int"); 
+                                	return INT;
+                            	}
 
-{letra}({letra}|{digito})*    { char *name = (char *) malloc(sizeof(yytext)*yyleng);
-                                strcpy(name,yytext);
-                                Info *info = findNode(name);
-                                if (info == NULL)
-                                	info = createNodeInfo(name,-1,getOffSet(),"var");
-                                yylval.node = createNode(NULL,NULL,info,"var");
-                                //printf("ID : %s\n",yytext);
-                                return ID;}
+{letra}({letra}|{digito})*    	{ 
+									char *name = (char *) malloc(sizeof(yytext)*yyleng);
+                                	strcpy(name,yytext);
+                                	Info *info = findNode(name);
+                                	if (info == NULL)
+                                		info = createNodeInfo(name,-1,getOffSet(),"var");
+                                	yylval.node = createNode(NULL,NULL,info,"var");
+                                	return ID;
+                                }
 
-[-+*/%;()=!><{}]              { return *yytext;}
+[-+*/%;()=!><{}]              	{ 	return *yytext;	  }
 
-"&&"							   { return AND; }
+"&&"							{ return AND;  	}
 
-"||"							   { return OR;	 }
+"||"							{ return OR;	}
 
-"=="							   { return EQ;	 }	
+"=="							{ return EQ;	}	
 
-"//".*\n                      ;
+"//".*\n                      	;
 
-.|\n                          ; /* ignore all the rest */
+.|\n                          	; /* ignore all the rest */
 
 %%
 

@@ -15,4 +15,13 @@ while0->less0
 less0->x2
 less0->n3
 while0->next4
+next4->next5
+next5->next6
+next6->printi0
+printi0->x4
+next5->asig2
+asig2->x5
+asig2->add0
+add0->x6
+add0->12
 }

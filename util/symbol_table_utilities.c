@@ -35,11 +35,6 @@ int findValue(char *name){
 	return info->value;
 }
 
-void insertValue(char *name, int value){
-	Info *info = findNode(name);
-	info->value = value;
-}
-
 void updateTable(char *name, int value) {
 	ListNode *aux = findListNode(name);
 	if (aux==NULL){ //Undeclared variable

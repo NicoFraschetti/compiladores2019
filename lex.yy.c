@@ -502,14 +502,13 @@ char *yytext;
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "types.h"
-#include "symbol_table_utilities.h"
-#include "ast_utilities.h"
+#include "util/ast_utilities.h"
+#include "util/symbol_table_utilities.h"
+#include "util/offset_generator.h"
 #include "calc-sintaxis.tab.h"
-#include "offset_generator.h"
 
+#line 511 "lex.yy.c"
 #line 512 "lex.yy.c"
-#line 513 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -726,10 +725,10 @@ YY_DECL
 		}
 
 	{
-#line 20 "calc-lexico.l"
+#line 19 "calc-lexico.l"
 
 
-#line 733 "lex.yy.c"
+#line 732 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -798,89 +797,90 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "calc-lexico.l"
-{	return VAR; }
+#line 21 "calc-lexico.l"
+{ 	return VAR; 	}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 24 "calc-lexico.l"
-{ return PRINTI; }
+#line 23 "calc-lexico.l"
+{ 	return PRINTI; 	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 26 "calc-lexico.l"
-{ return TRUE; }
+#line 25 "calc-lexico.l"
+{ 	return TRUE; 	}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 28 "calc-lexico.l"
-{ return FALSE; }
+#line 27 "calc-lexico.l"
+{ 	return FALSE; 	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 30 "calc-lexico.l"
-{ return INTEGER; }
+#line 29 "calc-lexico.l"
+{ 	return INTEGER; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 32 "calc-lexico.l"
-{ return BOOL; }
+#line 31 "calc-lexico.l"
+{ 	return BOOL; 	}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 34 "calc-lexico.l"
-{	return WHILE; }
+#line 33 "calc-lexico.l"
+{ 	return WHILE; 	}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "calc-lexico.l"
-{ return IF; }
+#line 35 "calc-lexico.l"
+{	return IF;		}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 38 "calc-lexico.l"
-{ return ELSE; }
+#line 37 "calc-lexico.l"
+{	return ELSE;	}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 40 "calc-lexico.l"
+#line 39 "calc-lexico.l"
 { 
-								Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
-								yylval.node = createNode(NULL,NULL,info,"int");
-                                //printf("INT : %d\n",atoi(yytext)); 
-                                return INT;}
+									Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
+									yylval.node = createNode(NULL,NULL,info,"int"); 
+                                	return INT;
+                            	}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 46 "calc-lexico.l"
-{ char *name = (char *) malloc(sizeof(yytext)*yyleng);
-                                strcpy(name,yytext);
-                                Info *info = findNode(name);
-                                if (info == NULL)
-                                	info = createNodeInfo(name,-1,getOffSet(),"var");
-                                yylval.node = createNode(NULL,NULL,info,"var");
-                                //printf("ID : %s\n",yytext);
-                                return ID;}
+#line 45 "calc-lexico.l"
+{ 
+									char *name = (char *) malloc(sizeof(yytext)*yyleng);
+                                	strcpy(name,yytext);
+                                	Info *info = findNode(name);
+                                	if (info == NULL)
+                                		info = createNodeInfo(name,-1,getOffSet(),"var");
+                                	yylval.node = createNode(NULL,NULL,info,"var");
+                                	return ID;
+                                }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 55 "calc-lexico.l"
-{ return *yytext;}
+{ 	return *yytext;	  }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 57 "calc-lexico.l"
-{ return AND; }
+{ return AND;  	}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 59 "calc-lexico.l"
-{ return OR;	 }
+{ return OR;	}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 61 "calc-lexico.l"
-{ return EQ;	 }	
+{ return EQ;	}	
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */

@@ -5,7 +5,6 @@
 #include <string.h>
 #include "symbol_table_utilities.h"
 #include "ast_utilities.h"
-#include "offset_generator.h"
 
 TreeNode *root;
 
@@ -160,10 +159,6 @@ int evalTree(TreeNode *t){
 		return evalTree(t->leftChild)%evalTree(t->rightChild);
 }
 
-int eval(){
-	return evalTree(root);
-}
-
 Info *createNodeInfo(char *name, int value, int offset, char *type){
 	Info *aux = (Info *) malloc(sizeof(Info));
 	aux->name = name;
@@ -171,32 +166,6 @@ Info *createNodeInfo(char *name, int value, int offset, char *type){
 	aux->offSet = offset;
 	aux->type = type;
 	return aux;
-}
-
-void printTree(TreeNode *t, int n){
-	printTree2(t,n,"root");
-}
-
-void printTree2(TreeNode *t, int n, char *s){
-	if (t!=NULL){
-		for (int i = 0; i < n; ++i){
-			printf("   │");
-		}
-		if (strcmp(t->label,"int")==0)
-			printf("── %d %s \n",t->info->value,s);
-		else if (strcmp(t->label,"var")==0)
-			printf("── %s %s \n",t->info->name,s);
-		else if (strcmp(t->label,"bool")==0){
-			if (t->info->value == 0)
-				printf("── false %s \n",s);
-			else
-				printf("── true %s \n",s);
-		}
-		else 
-			printf("── %s %s \n",t->label,s);
-		printTree2(t->leftChild,n+1,"leftChild");
-		printTree2(t->rightChild,n+1,"rightChild");
-	}	
 }
 
 int nextCount = 0;

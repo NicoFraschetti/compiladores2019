@@ -2,12 +2,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include "types.h"
-#include "symbol_table_utilities.h"
-#include "ast_utilities.h"
-#include "cod_3D_list_utilities.h"
-#include "offset_generator.h"
+#include "util/symbol_table_utilities.h"
+#include "util/ast_utilities.h"
+#include "util/cod_3D_list_utilities.h"
+
 void yyerror(char *);
 int yylex(void);
 
@@ -34,64 +32,62 @@ char *currentType;
 %%
 
 prog:
-    program            {
-                            //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
-                            generateDot($1,"dot_output.dot");
-                            //printSymbolTable();
-                            generateAssembly($1,getName());
-                            //generateCod3DList($1);
-                            //printCod3DList();
-                       }
+    program                 {
+                                //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
+                                generateDot($1,"dot_output.dot");
+                                //printSymbolTable();
+                                generateAssembly($1,getName());
+                                //generateCod3DList($1);
+                                //printCod3DList();
+                            }
 
 program:
-    decls statements       {    $$ = createNode($1,$2,NULL,"next"); }
+    decls statements        {    $$ = createNode($1,$2,NULL,"next"); }
     ;
 
 decls: 
-    decls decl             {    $$ = createNode($1,$2,NULL,"next"); }
-    |                      {    $$ = NULL; }
+    decls decl              {    $$ = createNode($1,$2,NULL,"next"); }
+    |                       {    $$ = NULL; }
     ;
 decl:
-    VAR type ID ';'        {
-
-                                insertInTable($3->info->name,-1,0,$3->info->offSet,currentType);
-                                $$ = NULL;
-
-                           }
-    | VAR type ID '=' expr ';'  { 
-                                insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType);
-                                $$ = createNode($3,$5,NULL,"asig"); 
-                           }
+    VAR type ID ';'         {
+                                 insertInTable($3->info->name,-1,0,$3->info->offSet,currentType);
+                                 $$ = NULL;
+                            }
+    | VAR type ID '=' expr ';'  
+                            { 
+                                 insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType);
+                                 $$ = createNode($3,$5,NULL,"asig"); 
+                            }
     ;
 
 statements:
-    statements statement        {   $$ = createNode($1,$2,NULL,"next"); }
-    |                           {   $$ = NULL; }                 
+    statements statement    {    $$ = createNode($1,$2,NULL,"next"); }
+    |                       {    $$ = NULL; }                 
     ;
 
 statement: 
-    ID '=' expr ';'             {   
-                                    updateTable($1->info->name,evalTree($3));
-
-                                    $$ = createNode($1,$3,NULL,"asig"); 
-                                }
-    | PRINTI '(' expr ')' ';'   {   $$ = createNode($3,NULL,NULL,"printi");
-                                    //printf("resultado es %d\n",evalTree($$->leftChild)); 
-                                }
-    | IF '(' expr ')' block ELSE block {    $$ = createNode($3,createNode($5,$7,NULL,"if_else"),NULL,"if"); }
-    | IF '(' expr ')' block            {    $$ = createNode($3,$5,NULL,"if"); }
-    | WHILE '(' expr ')' block         {    $$ = createNode($3,$5,NULL,"while"); }
+    ID '=' expr ';'         {   
+                                 updateTable($1->info->name,evalTree($3));
+                                 $$ = createNode($1,$3,NULL,"asig"); 
+                            }
+    | PRINTI '(' expr ')' ';'   
+                            {    $$ = createNode($3,NULL,NULL,"printi"); }
+    | IF '(' expr ')' block ELSE block 
+                            {    $$ = createNode($3,createNode($5,$7,NULL,"if_else"),NULL,"if"); }
+    | IF '(' expr ')' block {    $$ = createNode($3,$5,NULL,"if"); }
+    | WHILE '(' expr ')' block         
+                            {    $$ = createNode($3,$5,NULL,"while"); }
     ; 
 
 block: 
-    '{' program '}' { $$ = $2; }
-    | ';'           { $$ = createNode(NULL,NULL,NULL,"next"); }
+    '{' program '}'         {    $$ = $2; }
+    | ';'                   {    $$ = createNode(NULL,NULL,NULL,"next"); }
     ;
 
 expr:
     INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
     | ID        {   
-                    //printf("$1->info->offSet=%d, $1->info->name=%s\n", $1->info->offSet, $1->info->name);
                     ListNode *aux = findListNode($1->info->name);
                     if (aux==NULL){
                         printf("Undeclared Variable %s\n", $1->info->name);
@@ -110,21 +106,21 @@ expr:
     | expr '*' expr     {   $$ = createNode($1,$3,NULL,"mul"); }
     | expr '/' expr     {   $$ = createNode($1,$3,NULL,"div"); }
     | expr '%' expr     {   $$ = createNode($1,$3,NULL,"mod"); }
-    | '-' expr          {   Info *info = createNodeInfo(NULL, -1,-1,"int");
+    | '-' expr          {   
+                            Info *info = createNodeInfo(NULL, -1,-1,"int");
                             $$ = createNode($2,createNode(NULL,NULL,info,"int"),NULL,"mul");
                         }
-    | '(' expr ')'      {  $$ = $2; }
-    | expr '<' expr     {  $$ = createNode($1,$3,NULL,"less"); }
-    | expr '>' expr     {  $$ = createNode($1,$3,NULL,"greater"); }
-    | expr EQ expr      {  $$ = createNode($1,$3,NULL,"equal"); }
-    | expr AND expr     {  $$ = createNode($1,$3,NULL,"and"); }
-    | expr OR expr      {  $$ = createNode($1,$3,NULL,"or"); }
-    | '!' expr          {  $$ = createNode($2,NULL,NULL,"not"); }
-
+    | '(' expr ')'      {   $$ = $2; }
+    | expr '<' expr     {   $$ = createNode($1,$3,NULL,"less"); }
+    | expr '>' expr     {   $$ = createNode($1,$3,NULL,"greater"); }
+    | expr EQ expr      {   $$ = createNode($1,$3,NULL,"equal"); }
+    | expr AND expr     {   $$ = createNode($1,$3,NULL,"and"); }
+    | expr OR expr      {   $$ = createNode($1,$3,NULL,"or"); }
+    | '!' expr          {   $$ = createNode($2,NULL,NULL,"not"); }
     ;
 type:
-    INTEGER             {   currentType = "int";    }
-    | BOOL              {   currentType = "bool";       }
+    INTEGER             {   currentType = "int"; }
+    | BOOL              {   currentType = "bool"; }
     ;
 
 %%
