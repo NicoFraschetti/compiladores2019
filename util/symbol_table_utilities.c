@@ -5,9 +5,23 @@
 #include <string.h>
 #include "symbol_table_utilities.h"
 
+int level = 0;
+
+int symTblLevel(){
+	return level;
+}
+
+void incSymTblLevel(){
+	level++;
+}
+
+void decSymTblLevel(){
+	level--;
+}
+
 ListNode *p;
 
-void add(char *name, int value, int initialized, int offset, char *type) {
+void add(char *name, int value, int initialized, int offset, char *type, int lvl) {
 	ListNode *aux = (ListNode *) malloc(sizeof(ListNode));
 	aux->info = (Info *) malloc(sizeof(Info));
 	aux->info->name = (char *) malloc(sizeof(char *)*strlen(name));
@@ -15,6 +29,7 @@ void add(char *name, int value, int initialized, int offset, char *type) {
 	aux->info->value = value;
 	aux->info->offSet = offset;
 	aux->info->type = type;
+	aux->info->level = lvl;
 	aux->initialized = initialized;
 	aux->next = p;
 	p = aux;
@@ -55,12 +70,12 @@ ListNode *findListNode(char *name){
 	return NULL;	
 }
 
-void insertInTable(char *name, int value, int initialized, int offset, char *type){
+void insertInTable(char *name, int value, int initialized, int offset, char *type, int lvl){
 	if (findListNode(name)!=NULL){
 		printf("Variable %s already declared \n",name);
 		exit(1);
 	}
-	add(name,value,initialized,offset,type);
+	add(name,value,initialized,offset,type,lvl);
 }
 
 void printSymbolTable(){
@@ -68,7 +83,7 @@ void printSymbolTable(){
 	printf("[ ");
 	while (aux != NULL){
 		Info *info = aux->info;
-		printf("(%s,%d), ", info->name, info->offSet);
+		printf("(%s,%d, %d), ", info->name, info->offSet, info->level);
 		aux = aux->next;
 	}
 	printf("]\n");

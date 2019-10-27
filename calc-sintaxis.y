@@ -34,8 +34,8 @@ char *currentType;
 prog:
     program                 {
                                 //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
-                                generateDot($1,"dot_output.dot");
-                                //printSymbolTable();
+                                //generateDot($1,"dot_output.dot");
+                                printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
                                 //printCod3DList();
@@ -51,12 +51,12 @@ decls:
     ;
 decl:
     VAR type ID ';'         {
-                                 insertInTable($3->info->name,-1,0,$3->info->offSet,currentType);
+                                 insertInTable($3->info->name,-1,0,$3->info->offSet,currentType,symTblLevel());
                                  $$ = NULL;
                             }
     | VAR type ID '=' expr ';'  
                             { 
-                                 insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType);
+                                 insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
     ;
@@ -81,8 +81,10 @@ statement:
     ; 
 
 block: 
-    '{' program '}'         {    $$ = $2; }
-    | ';'                   {    $$ = createNode(NULL,NULL,NULL,"next"); }
+    {   incSymTblLevel();   }
+    '{' program '}'         
+    {   decSymTblLevel();   }   {    $$ = $3; }
+    | ';'                       {    $$ = createNode(NULL,NULL,NULL,"next"); }
     ;
 
 expr:

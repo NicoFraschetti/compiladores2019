@@ -6,6 +6,7 @@ typedef struct Info {
 	int value;
 	int offSet;
 	char *type;
+	int level;
 } Info;
 
 typedef struct ListNode {

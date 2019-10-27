@@ -396,7 +396,7 @@ void generateAssembly(TreeNode *t, char *fileName){
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->result->offSet);
 				break;
 			case 11: //or 
-				fprintf(f, "	movq	$1, %%rax\n");
+				fprintf(f, "	movq	$0, %%rax\n");
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	orq		$%d, %%rax\n", aux->arg1->value);
 				else
