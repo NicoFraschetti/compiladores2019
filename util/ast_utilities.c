@@ -196,7 +196,7 @@ char *generateNextName(TreeNode *t){
 	if (strcmp(t->label,"int")==0)
 		sprintf(name,"%d%d",t->info->value,intCount++);
 	else if (strcmp(t->label,"var")==0)
-		sprintf(name,"%s%d",t->info->name,varCount++);
+		sprintf(name,"%s%d%d%d",t->info->name,varCount++,-t->info->offSet,t->info->level);
 	else if (strcmp(t->label,"next")==0)
 		sprintf(name,"next%d",nextCount++);
 	else if (strcmp(t->label,"asig")==0)

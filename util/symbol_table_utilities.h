@@ -12,11 +12,15 @@ void add(char *name, int value, int initialized, int offset, char *type, int lvl
 
 Info *findNode(char *name);
 
+Info *findNodeInLevel(char *name, int lvl);
+
 int findValue(char *name);
 
 void updateTable(char *name, int value);
 
 ListNode *findListNode(char *name);
+
+ListNode *checkListNodeInLevel(char *name , int lvl);
 
 void insertInTable(char *name, int value, int initialized, int offset, char *type, int lvl);
 

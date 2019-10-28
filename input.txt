@@ -1,10 +1,10 @@
-var int x = 0;
 var int n = 10;
-var bool cond = !(x < n);
-while (!cond){
-	var bool cond2;
-	printi (x);
-	x = x + 1;
-	cond2 = !(x < n);
-	cond = cond2;
+var int i = 0;
+while (i < n){
+	var int j = i;
+	while (j < n){
+		printi (j);
+		j = j + 1;
+	}
+	i = i + 1;
 }

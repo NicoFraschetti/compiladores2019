@@ -5,6 +5,7 @@
 #include "util/symbol_table_utilities.h"
 #include "util/ast_utilities.h"
 #include "util/cod_3D_list_utilities.h"
+#include "util/offset_generator.h"
 
 void yyerror(char *);
 int yylex(void);
@@ -29,18 +30,18 @@ char *currentType;
 %left '*' '/' '%'
 
  
-%%
+%%     
 
 prog:
     program                 {
                                 //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
                                 //generateDot($1,"dot_output.dot");
-                                printSymbolTable();
+                                //printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
                                 //printCod3DList();
                             }
-
+    ;
 program:
     decls statements        {    $$ = createNode($1,$2,NULL,"next"); }
     ;
@@ -50,13 +51,33 @@ decls:
     |                       {    $$ = NULL; }
     ;
 decl:
-    VAR type ID ';'         {
-                                 insertInTable($3->info->name,-1,0,$3->info->offSet,currentType,symTblLevel());
+    VAR type ID ';'         {    
+                                 if ($3->info->offSet == -1){
+                                    $3->info->offSet = getOffSet();
+                                    $3->info->level = symTblLevel();
+                                    insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
+                                 }
+                                 else{
+                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),"var");
+                                    info->level = symTblLevel();
+                                    $3->info = info;
+                                    insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
+                                 }
                                  $$ = NULL;
                             }
     | VAR type ID '=' expr ';'  
-                            { 
-                                 insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
+                            {    
+                                 if ($3->info->offSet == -1){
+                                    $3->info->offSet = getOffSet();
+                                    $3->info->level = symTblLevel();
+                                    insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
+                                 }
+                                 else{
+                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),"var");
+                                    info->level = symTblLevel();
+                                    $3->info = info;
+                                    insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
+                                 }
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
     ;

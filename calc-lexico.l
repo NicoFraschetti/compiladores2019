@@ -47,7 +47,7 @@ else  						  	{	return ELSE;	}
                                 	strcpy(name,yytext);
                                 	Info *info = findNode(name);
                                 	if (info == NULL)
-                                		info = createNodeInfo(name,-1,getOffSet(),"var");
+                                		info = createNodeInfo(name,-1,-1,"var");
                                 	yylval.node = createNode(NULL,NULL,info,"var");
                                 	return ID;
                                 }

@@ -45,6 +45,16 @@ Info *findNode(char *name){
 	return NULL;
 } 
 
+Info *findNodeInLevel(char *name, int lvl){
+	ListNode *aux = p;
+	while (aux != NULL) {
+		if (strcmp(aux->info->name,name)==0 && aux->info->level == lvl)
+			return aux->info;
+		aux = aux->next;
+	}
+	return NULL;	
+}
+
 int findValue(char *name){
 	Info *info = findNode(name);
 	return info->value;
@@ -70,8 +80,18 @@ ListNode *findListNode(char *name){
 	return NULL;	
 }
 
+ListNode *checkListNodeInLevel(char *name , int lvl){
+	ListNode *aux = p;
+	while (aux != NULL) {
+		if (strcmp(aux->info->name,name)==0 && aux->info->level == lvl)
+			return aux;
+		aux = aux->next;
+	}
+	return NULL;
+}
+
 void insertInTable(char *name, int value, int initialized, int offset, char *type, int lvl){
-	if (findListNode(name)!=NULL){
+	if (checkListNodeInLevel(name,lvl)!=NULL){
 		printf("Variable %s already declared \n",name);
 		exit(1);
 	}
