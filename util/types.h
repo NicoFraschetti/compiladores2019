@@ -44,7 +44,8 @@ typedef enum {
 	WHILE_SENTENCE,
 	ENDIF,
 	MIDWHILE,
-	ENDWHILE	
+	ENDWHILE,
+	PRINTBOOL	
 } Op;
 
 typedef struct Cod3D {

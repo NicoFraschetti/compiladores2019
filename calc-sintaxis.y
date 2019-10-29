@@ -18,7 +18,7 @@ char *currentType;
  
 %union { struct TreeNode *node;}
  
-%token<node> INT ID PRINTI
+%token<node> INT ID PRINTI PRINTB
 %token VAR AND OR INTEGER BOOL TRUE FALSE WHILE IF ELSE
 
 %type<node> program decls decl statements statement expr block  
@@ -34,8 +34,7 @@ char *currentType;
 
 prog:
     program                 {
-                                //printf("Synstax tree type = %s \n", checkTypesCorrectnes($1));
-                                //generateDot($1,"dot_output.dot");
+                                generateDot($1,"dot_output.dot");
                                 //printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
@@ -89,11 +88,13 @@ statements:
 
 statement: 
     ID '=' expr ';'         {   
-                                 updateTable($1->info->name,evalTree($3));
+                                 updateTable($1->info->name,evalTree($3),symTblLevel());
                                  $$ = createNode($1,$3,NULL,"asig"); 
                             }
     | PRINTI '(' expr ')' ';'   
                             {    $$ = createNode($3,NULL,NULL,"printi"); }
+    | PRINTB '(' expr ')' ';'
+                            {    $$ = createNode($3,NULL,NULL,"printb"); }
     | IF '(' expr ')' block ELSE block 
                             {    $$ = createNode($3,createNode($5,$7,NULL,"if_else"),NULL,"if"); }
     | IF '(' expr ')' block {    $$ = createNode($3,$5,NULL,"if"); }
@@ -111,7 +112,7 @@ block:
 expr:
     INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
     | ID        {   
-                    ListNode *aux = findListNode($1->info->name);
+                    ListNode *aux = findListNode($1->info->name,symTblLevel());
                     if (aux==NULL){
                         printf("Undeclared Variable %s\n", $1->info->name);
                         exit(1);

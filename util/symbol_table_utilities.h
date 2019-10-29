@@ -10,15 +10,13 @@ void decSymTblLevel();
 
 void add(char *name, int value, int initialized, int offset, char *type, int lvl);
 
-Info *findNode(char *name);
+Info *findNode(char *name, int lvl);
 
-Info *findNodeInLevel(char *name, int lvl);
+//int findValue(char *name);
 
-int findValue(char *name);
+void updateTable(char *name, int value, int lvl);
 
-void updateTable(char *name, int value);
-
-ListNode *findListNode(char *name);
+ListNode *findListNode(char *name, int lvl);
 
 ListNode *checkListNodeInLevel(char *name , int lvl);
 

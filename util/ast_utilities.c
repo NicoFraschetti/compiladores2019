@@ -27,20 +27,31 @@ char *checkTypesCorrectnes(TreeNode *t){
 		return t->label;
 	}
 	else if (strcmp(t->label,"var")==0){
-		return findNode(t->info->name)->type;
+		return findNode(t->info->name,t->info->level)->type;
 	}
 	else if (strcmp(t->label,"asig")==0){
 		char *leftChildType = checkTypesCorrectnes(t->leftChild);
 		char *rightChildType = checkTypesCorrectnes(t->rightChild);
 		if (strcmp(leftChildType,rightChildType)!=0){
-			printf("leftChildType=%s\n",leftChildType);
 			printf("Assignment error\n");
 			exit(1);
 		}
 		return leftChildType;
 	}
-	else if (strcmp(t->label,"printi")==0)
-		return checkTypesCorrectnes(t->leftChild);
+	else if (strcmp(t->label,"printi")==0){
+		if (strcmp(checkTypesCorrectnes(t->leftChild),"int")!=0){
+			printf("printi must only be used for integers\n");
+			exit(1);	
+		}
+		return "int";
+	}
+	else if (strcmp(t->label,"printb")==0){
+		if (strcmp(checkTypesCorrectnes(t->leftChild),"bool")!=0){
+			printf("printb must only be used for booleans\n");
+			exit(1);	
+		}
+		return "bool";
+	}
 	else if (strcmp(t->label,"add")==0){
 		char *leftChildType = checkTypesCorrectnes(t->leftChild);
 		char *rightChildType = checkTypesCorrectnes(t->rightChild);
@@ -137,6 +148,26 @@ char *checkTypesCorrectnes(TreeNode *t){
 			printf("Type error in not operation\n");
 			exit(1);
 		}
+		return "bool";
+	}
+	else if (strcmp(t->label,"if")==0){
+		if (strcmp(checkTypesCorrectnes(t->leftChild),"bool")!=0){
+			printf("if condition does not evaluate to boolean\n");
+			exit(1);	
+		}
+		checkTypesCorrectnes(t->rightChild);
+		return "bool";
+	}
+	else if (strcmp(t->label,"if_else")==0){
+		checkTypesCorrectnes(t->leftChild);
+		checkTypesCorrectnes(t->rightChild);
+	}
+	else if (strcmp(t->label,"while")==0){
+		if (strcmp(checkTypesCorrectnes(t->leftChild),"bool")!=0){
+			printf("while condition does not evaluate to boolean\n");
+			exit(1);	
+		}
+		checkTypesCorrectnes(t->rightChild);
 		return "bool";
 	}
 	if (strcmp(t->label,"next")==0)
@@ -244,7 +275,7 @@ char *generateNextName(TreeNode *t){
 
 void generateDot2(TreeNode *t, FILE *f, char *parentName){
 	if (t!=NULL){
-		char * nodeName = generateNextName(t);
+		char *nodeName = generateNextName(t);
 		fprintf(f,"%s->%s\n", parentName,nodeName);
 		generateDot2(t->leftChild,f,nodeName);
 		generateDot2(t->rightChild,f,nodeName);
@@ -253,7 +284,7 @@ void generateDot2(TreeNode *t, FILE *f, char *parentName){
 
 void generateDot(TreeNode *t, char *fileName){
 	FILE *f = fopen(fileName,"w");
-	char * rootName = generateNextName(t);
+	char *rootName = generateNextName(t);
 	fprintf(f, "digraph{\n");
 	fprintf(f, "inic[shape=point];\n");
 	fprintf(f, "inic->%s\n",rootName);

@@ -51,7 +51,7 @@ Info *generateCod3DList(TreeNode *t) {
 	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0)
 		return t->info;
 	else if (strcmp(t->label,"var")==0)
-		return findNodeInLevel(t->info->name,t->info->level);
+		return findNode(t->info->name,t->info->level);
 	else if (strcmp(t->label,"asig")==0){
 		Op opCod = ASIGI;
 		insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
@@ -161,6 +161,11 @@ Info *generateCod3DList(TreeNode *t) {
 		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
+	else if (strcmp(t->label,"printb")==0){
+		Op opCod = PRINTBOOL;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
+		return NULL;
+	}
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->rightChild);
 }
@@ -227,6 +232,8 @@ char* OpCodName(int opCod){
 		case 19:
 			return "ENDWHILE";
 			break;
+		case 20:
+			return "PRINTB";
 		default:
 			return NULL;
 	}
@@ -253,6 +260,7 @@ void printCod3DList(){
 }
 
 void generateAssembly(TreeNode *t, char *fileName){
+	checkTypesCorrectnes(t);
 	generateCod3DList(t);
 	Cod3D *aux = head; 
 	char *subStr = malloc(sizeof(char)*31);
@@ -474,6 +482,13 @@ void generateAssembly(TreeNode *t, char *fileName){
 				p = top();
 				pop();
 				fprintf(f, "	je 		%s\n", p->endif_tag);
+				break;
+			case 20: //printb
+				if (aux ->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rdi\n", aux->arg1->value);
+				else
+					fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
+				fprintf(f, "	call	printb\n");
 				break;
 
 		}	

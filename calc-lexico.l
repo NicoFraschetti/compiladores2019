@@ -22,6 +22,8 @@ var						  	  	{ 	return VAR; 	}
 
 printi						  	{ 	return PRINTI; 	}
 
+printb							{	return PRINTB;	}
+
 true						  	{ 	return TRUE; 	}
 
 false						  	{ 	return FALSE; 	}
@@ -45,7 +47,7 @@ else  						  	{	return ELSE;	}
 {letra}({letra}|{digito})*    	{ 
 									char *name = (char *) malloc(sizeof(yytext)*yyleng);
                                 	strcpy(name,yytext);
-                                	Info *info = findNode(name);
+                                	Info *info = findNode(name,symTblLevel());
                                 	if (info == NULL)
                                 		info = createNodeInfo(name,-1,-1,"var");
                                 	yylval.node = createNode(NULL,NULL,info,"var");

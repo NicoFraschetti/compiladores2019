@@ -35,33 +35,23 @@ void add(char *name, int value, int initialized, int offset, char *type, int lvl
 	p = aux;
 }
 
-Info *findNode(char *name){
+Info *findNode(char *name, int lvl){
 	ListNode *aux = p;
 	while (aux != NULL) {
-		if (strcmp(aux->info->name,name)==0)
+		if (strcmp(aux->info->name,name)==0 && aux->info->level <= lvl)
 			return aux->info;
 		aux = aux->next;
 	}
 	return NULL;
 } 
 
-Info *findNodeInLevel(char *name, int lvl){
-	ListNode *aux = p;
-	while (aux != NULL) {
-		if (strcmp(aux->info->name,name)==0 && aux->info->level == lvl)
-			return aux->info;
-		aux = aux->next;
-	}
-	return NULL;	
-}
-
-int findValue(char *name){
+/*int findValue(char *name){
 	Info *info = findNode(name);
 	return info->value;
-}
+}*/
 
-void updateTable(char *name, int value) {
-	ListNode *aux = findListNode(name);
+void updateTable(char *name, int value, int lvl) {
+	ListNode *aux = findListNode(name,lvl);
 	if (aux==NULL){ //Undeclared variable
 		printf("undeclared variable %s\n",name);
 		exit(1);
@@ -70,10 +60,10 @@ void updateTable(char *name, int value) {
 	aux->initialized = 1;
 }
 
-ListNode *findListNode(char *name){
+ListNode *findListNode(char *name, int lvl){
 	ListNode *aux = p;
 	while (aux != NULL) {
-		if (strcmp(aux->info->name,name)==0)
+		if (strcmp(aux->info->name,name)==0 && aux->info->level <= lvl)
 			return aux;
 		aux = aux->next;
 	}
