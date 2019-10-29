@@ -20,7 +20,7 @@ TreeNode *createNode(TreeNode *lft, TreeNode *rgt, Info *info, char * lbl){
 
 char *checkTypesCorrectnes(TreeNode *t){
 	if (t == NULL)
-		return NULL;
+		return "";
 	if (strcmp(t->label,"next")==0)
 		checkTypesCorrectnes(t->leftChild);
 	else if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0){
@@ -36,21 +36,18 @@ char *checkTypesCorrectnes(TreeNode *t){
 			printf("Assignment error\n");
 			exit(1);
 		}
-		return leftChildType;
 	}
 	else if (strcmp(t->label,"printi")==0){
 		if (strcmp(checkTypesCorrectnes(t->leftChild),"int")!=0){
 			printf("printi must only be used for integers\n");
 			exit(1);	
 		}
-		return "int";
 	}
 	else if (strcmp(t->label,"printb")==0){
 		if (strcmp(checkTypesCorrectnes(t->leftChild),"bool")!=0){
 			printf("printb must only be used for booleans\n");
 			exit(1);	
 		}
-		return "bool";
 	}
 	else if (strcmp(t->label,"add")==0){
 		char *leftChildType = checkTypesCorrectnes(t->leftChild);
@@ -156,7 +153,6 @@ char *checkTypesCorrectnes(TreeNode *t){
 			exit(1);	
 		}
 		checkTypesCorrectnes(t->rightChild);
-		return "bool";
 	}
 	else if (strcmp(t->label,"if_else")==0){
 		checkTypesCorrectnes(t->leftChild);
@@ -168,7 +164,6 @@ char *checkTypesCorrectnes(TreeNode *t){
 			exit(1);	
 		}
 		checkTypesCorrectnes(t->rightChild);
-		return "bool";
 	}
 	if (strcmp(t->label,"next")==0)
 		checkTypesCorrectnes(t->rightChild);
