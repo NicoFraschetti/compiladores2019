@@ -1,4 +1,8 @@
 #!/bin/bash
+
+if [ ! -f a.out ]; then
+	sh script.sh
+fi
 FILE=input.s
 if test -f "$FILE"; then
 	rm input.s
