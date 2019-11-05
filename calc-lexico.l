@@ -38,6 +38,12 @@ if 							  	{	return IF;		}
 
 else  						  	{	return ELSE;	}
 
+"main"							{	return MAIN;	}
+
+extern							{	return EXTERN;	}
+
+"return"						{	return RETURN;	}
+
 {digito}+                     	{ 
 									Info *info = createNodeInfo(NULL, atoi(yytext),-1,"int");
 									yylval.node = createNode(NULL,NULL,info,"int"); 
@@ -54,7 +60,7 @@ else  						  	{	return ELSE;	}
                                 	return ID;
                                 }
 
-[-+*/%;()=!><{}]              	{ 	return *yytext;	  }
+[-+*/%,;()=!><{}]              	{ 	return *yytext;	  }
 
 "&&"							{ return AND;  	}
 

@@ -13,7 +13,11 @@ void push(LabelPair *p){
 }
 
 void pop(){
+	StackNode *aux = stack_top;
 	stack_top = stack_top->next;
+	if (aux != NULL){
+		free(aux);
+	}
 }
 
 LabelPair *top(){

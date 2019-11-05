@@ -1,9 +1,18 @@
-var int i = 1;
-while (i < 20){
-  var int j = 1;
-  while (j < 20){
-    printi(j);
-    j = j + 1;
-  }
-  i = i + 1;
+int sum3 (int x, int y, int z, int x2, int y2, int z2){
+	var int x2 = x;
+	return x + y + z;
+}
+int sum(int x){
+}
+int a(){
+	
+}
+int b(){
+	
+}
+bool c(bool ca){
+	
+}
+int main () {
+	var int x;
 }

@@ -2,10 +2,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "util/symbol_table_utilities.h"
 #include "util/ast_utilities.h"
 #include "util/cod_3D_list_utilities.h"
 #include "util/offset_generator.h"
+#include "util/label_stack.h"
 
 void yyerror(char *);
 int yylex(void);
@@ -19,9 +21,9 @@ char *currentType;
 %union { struct TreeNode *node;}
  
 %token<node> INT ID PRINTI PRINTB
-%token VAR AND OR INTEGER BOOL TRUE FALSE WHILE IF ELSE
+%token VAR AND OR INTEGER BOOL TRUE FALSE WHILE IF ELSE MAIN EXTERN RETURN
 
-%type<node> program decls decl statements statement expr block  
+%type<node> program decls decl statements statement expr block init func funcList paramList exprList  
 
 %left AND OR
 %left '!'
@@ -30,16 +32,67 @@ char *currentType;
 %left '*' '/' '%'
 
  
-%%     
+%%
 
 prog:
-    program                 {
-                                //generateDot($1,"dot_output.dot");
-                                //printSymbolTable();
-                                generateAssembly($1,getName());
+    init                    {   
+                                generateDot($1,"dot_output.dot");
+                                printSymbolTable();
                                 //generateCod3DList($1);
-                                //printCod3DList();
+                                //printCod3DList(); 
+                            }  
+
+init:
+    decls funcList          {   $$ = createNode($1,$2,NULL,"next"); }
+    | funcList              {   $$ = createNode(NULL,$1,NULL,"next"); }
+    ; 
+
+funcList:
+    func funcList           {   $$ = createNode($1,$2,NULL,"next"); }
+    | INTEGER MAIN '(' ')' '{' program '}' {  $$ = createNode($6,NULL,NULL,"main"); }
+    ;
+
+func:
+    type ID '(' paramList ')' block  {
+                                        decSymTblLevel();   
+                                        Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
+                                        info->level = symTblLevel();
+                                        insertInTable(info->name,1,getOffSet(),info->type,info->level,$4,"function");
+                                        $$ = createNode($4,$6,info,"function"); 
+                                     }
+    | type ID '(' ')' block          {  
+                                        Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
+                                        info->level = symTblLevel();
+                                        insertInTable(info->name,1,getOffSet(),info->type,info->level,NULL,"function");
+                                        $$ = createNode(NULL,$5,info,"function"); 
+                                     }
+    | EXTERN ID '(' paramList ')' ';' { 
+                                        Info *info = createNodeInfo($2->info->name,-1,-1,"extern");  
+                                        $$ = createNode($4,NULL,info,"function"); 
+                                      }
+    | EXTERN ID '(' ')' ';'          {  
+                                        Info *info = createNodeInfo($2->info->name,-1,-1,"extern");
+                                        $$ = createNode(NULL,NULL,info,"function"); 
+                                     }
+
+paramList:
+    type ID {   LabelPair *p = (LabelPair *) malloc(sizeof(LabelPair)); 
+                p->else_tag = (char *) malloc(sizeof(char)*strlen(currentType));
+                strcpy(p->else_tag, currentType);
+                push(p);
+            } ',' paramList   
+                            {   
+                                Info *info = createNodeInfo($2->info->name,-1,-1,top()->else_tag);
+                                insertInTable(info->name,1,getOffSet(),info->type,symTblLevel(),NULL,"param");
+                                pop();
+                                $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),$5,NULL,"next_arg"); 
                             }
+    | type ID               {  
+                                incSymTblLevel();
+                                Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
+                                insertInTable(info->name,1,getOffSet(),info->type,symTblLevel(),NULL,"param"); 
+                                $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),NULL,NULL,"next_arg"); 
+                            }   
     ;
 program:
     decls statements        {    $$ = createNode($1,$2,NULL,"next"); }
@@ -55,13 +108,13 @@ decl:
                                     $3->info->offSet = getOffSet();
                                     $3->info->level = symTblLevel();
                                     $3->info->type = currentType;
-                                    insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
+                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  else{
                                     Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
                                     info->level = symTblLevel();
                                     $3->info = info;
-                                    insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
+                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  $$ = NULL;
                             }
@@ -71,13 +124,13 @@ decl:
                                     $3->info->offSet = getOffSet();
                                     $3->info->level = symTblLevel();
                                     $3->info->type = currentType;
-                                    insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
+                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  else{
                                     Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
                                     info->level = symTblLevel();
                                     $3->info = info;
-                                    insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
+                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
@@ -108,6 +161,7 @@ statement:
     | IF '(' expr ')' block {    $$ = createNode($3,$5,NULL,"if"); }
     | WHILE '(' expr ')' block         
                             {    $$ = createNode($3,$5,NULL,"while"); }
+    | RETURN expr ';'       {    $$ = createNode($2,NULL,NULL,"return"); }
     ; 
 
 block: 
@@ -149,7 +203,21 @@ expr:
     | expr AND expr     {   $$ = createNode($1,$3,NULL,"and"); }
     | expr OR expr      {   $$ = createNode($1,$3,NULL,"or"); }
     | '!' expr          {   $$ = createNode($2,NULL,NULL,"not"); }
+    | ID '(' exprList ')' 
+                        { 
+                            Info *info = findNode($1->info->name);
+                            if (info == NULL){
+                                printf("Undeclared function %s\n", $1->info->name);
+                                exit(1);
+                            }       
+                            $$ = createNode(NULL,$3,info,"call"); }
     ;
+
+exprList:
+    expr ',' exprList   {   $$ = createNode($1,$3,NULL,"actual_arg"); }
+    | expr              {   $$ = createNode($1,NULL,NULL,"actual_arg"); }
+    ;
+
 type:
     INTEGER             {   currentType = "int"; }
     | BOOL              {   currentType = "bool"; }

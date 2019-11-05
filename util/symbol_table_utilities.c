@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "symbol_table_utilities.h"
+#include "ast_utilities.h"
 
 ListNode *p;
 
@@ -33,16 +34,31 @@ void decSymTblLevel(){
 	level--;
 }
 
-void add(char *name, int value, int initialized, int offset, char *type, int lvl) {
+void add(char *name, int initialized, int offset, char *type, int lvl, TreeNode *paramList, char *label) {
 	ListNode *aux = (ListNode *) malloc(sizeof(ListNode));
 	aux->info = (Info *) malloc(sizeof(Info));
 	aux->info->name = (char *) malloc(sizeof(char *)*strlen(name));
 	strcpy(aux->info->name,name);
-	aux->info->value = value;
 	aux->info->offSet = offset;
 	aux->info->type = type;
 	aux->info->level = lvl;
 	aux->initialized = initialized;
+	aux->label = label;
+	while (paramList != NULL){
+		//addType(aux->head,aux->tail,t->leftChild->info->type);
+		TypesList *aux2 = (TypesList *) malloc(sizeof(TypesList));
+		aux2->type = (char *) malloc(sizeof(char)*strlen(type));
+		strcpy(aux2->type,paramList->leftChild->info->type);
+		aux2->next = NULL;
+		if (aux->head == NULL)
+			aux->head = aux->tail = aux2;
+		else{
+			aux->tail->next = aux2;
+			aux->tail = aux2;
+		}	
+		paramList = paramList->rightChild;	
+	}
+
 	aux->next = p;
 	p = aux;
 }
@@ -62,8 +78,8 @@ Info *findNode(char *name){
 	return info->value;
 }*/
 
-/*void updateTable(char *name, int value) {
-	ListNode *aux = findListNode(name);
+/*void updateTable(char *name, int value, int lvl) {
+	ListNode *aux = findListNode(name,lvl);
 	if (aux==NULL){ //Undeclared variable
 		printf("undeclared variable %s\n",name);
 		exit(1);
@@ -92,12 +108,12 @@ ListNode *checkListNodeInLevel(char *name , int lvl){
 	return NULL;
 }
 
-void insertInTable(char *name, int value, int initialized, int offset, char *type, int lvl){
+void insertInTable(char *name, int initialized, int offset, char *type, int lvl, TreeNode *paramList, char *label){
 	if (checkListNodeInLevel(name,lvl)!=NULL){
 		printf("Variable %s already declared \n",name);
 		exit(1);
 	}
-	add(name,value,initialized,offset,type,lvl);
+	add(name,initialized,offset,type,lvl,paramList,label);
 }
 
 void printSymbolTable(){
@@ -105,7 +121,13 @@ void printSymbolTable(){
 	printf("[ ");
 	while (aux != NULL){
 		Info *info = aux->info;
-		printf("(%s,%d, %d), ", info->name, info->offSet, info->level);
+		printf("(%s,%d, %d ,", info->name, info->offSet, info->level);
+		TypesList *aux2 = aux->head;
+		while (aux2 != NULL){
+			printf("%s ,", aux2->type);
+			aux2 = aux2->next;
+		}
+		printf(" %s) ", aux->label);
 		aux = aux->next;
 	}
 	printf("]\n");

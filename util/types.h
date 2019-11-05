@@ -1,6 +1,11 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+typedef struct TypesList {
+	char *type;
+	struct TypesList *next;
+} TypesList;	
+
 typedef struct Info {
 	char *name;
 	int value;
@@ -13,6 +18,9 @@ typedef struct ListNode {
 	Info *info;
 	struct ListNode *next;
 	int initialized;
+	TypesList *head;
+	TypesList *tail;
+	char *label;
 } ListNode;
 
 typedef struct TreeNode{

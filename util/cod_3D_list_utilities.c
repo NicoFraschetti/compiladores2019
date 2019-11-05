@@ -164,6 +164,9 @@ Info *generateCod3DList(TreeNode *t) {
 		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
+	else if (strcmp(t->label,"function")==0){
+		return NULL;
+	}
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->rightChild);
 }

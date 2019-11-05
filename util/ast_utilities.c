@@ -194,7 +194,14 @@ Info *createNodeInfo(char *name, int value, int offset, char *type){
 	return aux;
 }
 
+int functionCount = 0;
+int formalArgCount = 0;
+int nextArgCount = 0;
+int externCount = 0;
+int returnCount = 0;
+int callCount = 0;
 int nextCount = 0;
+int actualArgCount = 0;
 int asigCount = 0;
 int intCount = 0;
 int trueCount = 0;
@@ -265,6 +272,20 @@ char *generateNextName(TreeNode *t){
 		sprintf(name,"if_else%d",ifElseCount++);
 	else if (strcmp(t->label,"while")==0)
 		sprintf(name,"while%d",whileCount++);
+	else if (strcmp(t->label,"function")==0)
+		sprintf(name,"%s%d",t->info->name,functionCount++);
+	else if (strcmp(t->label,"main")==0)
+		sprintf(name,"main");
+	else if (strcmp(t->label,"formal_arg")==0)
+		sprintf(name,"%sformal_arg%d",t->info->type,formalArgCount++);
+	else if (strcmp(t->label,"next_arg")==0)
+		sprintf(name,"next_arg%d",nextArgCount++);
+	else if (strcmp(t->label,"return")==0)
+		sprintf(name,"return%d",returnCount++);
+	else if (strcmp(t->label,"call")==0)
+		sprintf(name,"call%s%d",t->info->name,callCount++);
+	else if (strcmp(t->label,"actual_arg")==0)
+		sprintf(name,"actual_arg%d",actualArgCount++);
 	return name;
 }
 
