@@ -27,7 +27,7 @@ char *checkTypesCorrectnes(TreeNode *t){
 		return t->label;
 	}
 	else if (strcmp(t->label,"var")==0){
-		return findNode(t->info->name,t->info->level)->type;
+		return t->info->type;
 	}
 	else if (strcmp(t->label,"asig")==0){
 		char *leftChildType = checkTypesCorrectnes(t->leftChild);
@@ -222,7 +222,7 @@ char *generateNextName(TreeNode *t){
 	if (strcmp(t->label,"int")==0)
 		sprintf(name,"%d%d",t->info->value,intCount++);
 	else if (strcmp(t->label,"var")==0)
-		sprintf(name,"%s%d%d%d",t->info->name,varCount++,-t->info->offSet,t->info->level);
+		sprintf(name,"%s%d%d%d%s",t->info->name,varCount++,-t->info->offSet,t->info->level,t->info->type);
 	else if (strcmp(t->label,"next")==0)
 		sprintf(name,"next%d",nextCount++);
 	else if (strcmp(t->label,"asig")==0)

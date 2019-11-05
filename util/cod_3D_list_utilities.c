@@ -48,10 +48,8 @@ Info *generateCod3DList(TreeNode *t) {
 		return NULL;
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->leftChild);
-	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0)
+	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0 || strcmp(t->label,"var")==0)
 		return t->info;
-	else if (strcmp(t->label,"var")==0)
-		return findNode(t->info->name,t->info->level);
 	else if (strcmp(t->label,"asig")==0){
 		Op opCod = ASIGI;
 		insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);

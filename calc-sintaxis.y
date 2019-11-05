@@ -34,7 +34,7 @@ char *currentType;
 
 prog:
     program                 {
-                                generateDot($1,"dot_output.dot");
+                                //generateDot($1,"dot_output.dot");
                                 //printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
@@ -54,10 +54,11 @@ decl:
                                  if ($3->info->offSet == -1){
                                     $3->info->offSet = getOffSet();
                                     $3->info->level = symTblLevel();
+                                    $3->info->type = currentType;
                                     insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
                                  }
                                  else{
-                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),"var");
+                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
                                     info->level = symTblLevel();
                                     $3->info = info;
                                     insertInTable($3->info->name,-1,1,$3->info->offSet,currentType,symTblLevel());
@@ -69,10 +70,11 @@ decl:
                                  if ($3->info->offSet == -1){
                                     $3->info->offSet = getOffSet();
                                     $3->info->level = symTblLevel();
+                                    $3->info->type = currentType;
                                     insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
                                  }
                                  else{
-                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),"var");
+                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
                                     info->level = symTblLevel();
                                     $3->info = info;
                                     insertInTable($3->info->name,evalTree($5),1,$3->info->offSet,currentType,symTblLevel());
@@ -88,7 +90,13 @@ statements:
 
 statement: 
     ID '=' expr ';'         {   
-                                 updateTable($1->info->name,evalTree($3),symTblLevel());
+                                 //updateTable($1->info->name,evalTree($3),symTblLevel());
+                                 ListNode *aux = findListNode($1->info->name);
+                                 if (aux==NULL){ //Undeclared variable
+                                    printf("undeclared variable %s\n",$1->info->name);
+                                    exit(1);
+                                 }
+                                 aux->initialized = 1;
                                  $$ = createNode($1,$3,NULL,"asig"); 
                             }
     | PRINTI '(' expr ')' ';'   
@@ -112,7 +120,7 @@ block:
 expr:
     INT         {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,$1->info->value,-1,"int"),"int"); }
     | ID        {   
-                    ListNode *aux = findListNode($1->info->name,symTblLevel());
+                    ListNode *aux = findListNode($1->info->name);
                     if (aux==NULL){
                         printf("Undeclared Variable %s\n", $1->info->name);
                         exit(1);

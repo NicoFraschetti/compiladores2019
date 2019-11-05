@@ -5,6 +5,8 @@
 #include <string.h>
 #include "symbol_table_utilities.h"
 
+ListNode *p;
+
 int level = 0;
 
 int symTblLevel(){
@@ -15,11 +17,21 @@ void incSymTblLevel(){
 	level++;
 }
 
-void decSymTblLevel(){
-	level--;
+void clearLevel(){
+	ListNode *aux = p;
+	ListNode *aux2;
+	while (aux != NULL && aux->info->level == level){
+		aux2 = aux;
+		aux = aux->next;
+		free(aux2);
+	}
+	p = aux;
 }
 
-ListNode *p;
+void decSymTblLevel(){
+	clearLevel();
+	level--;
+}
 
 void add(char *name, int value, int initialized, int offset, char *type, int lvl) {
 	ListNode *aux = (ListNode *) malloc(sizeof(ListNode));
@@ -35,10 +47,10 @@ void add(char *name, int value, int initialized, int offset, char *type, int lvl
 	p = aux;
 }
 
-Info *findNode(char *name, int lvl){
+Info *findNode(char *name){
 	ListNode *aux = p;
 	while (aux != NULL) {
-		if (strcmp(aux->info->name,name)==0 && aux->info->level <= lvl)
+		if (strcmp(aux->info->name,name)==0)
 			return aux->info;
 		aux = aux->next;
 	}
@@ -50,20 +62,20 @@ Info *findNode(char *name, int lvl){
 	return info->value;
 }*/
 
-void updateTable(char *name, int value, int lvl) {
-	ListNode *aux = findListNode(name,lvl);
+/*void updateTable(char *name, int value) {
+	ListNode *aux = findListNode(name);
 	if (aux==NULL){ //Undeclared variable
 		printf("undeclared variable %s\n",name);
 		exit(1);
 	} 
 	aux->info->value = value;
 	aux->initialized = 1;
-}
+}*/
 
-ListNode *findListNode(char *name, int lvl){
+ListNode *findListNode(char *name){
 	ListNode *aux = p;
 	while (aux != NULL) {
-		if (strcmp(aux->info->name,name)==0 && aux->info->level <= lvl)
+		if (strcmp(aux->info->name,name)==0)
 			return aux;
 		aux = aux->next;
 	}

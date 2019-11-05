@@ -47,7 +47,7 @@ else  						  	{	return ELSE;	}
 {letra}({letra}|{digito})*    	{ 
 									char *name = (char *) malloc(sizeof(yytext)*yyleng);
                                 	strcpy(name,yytext);
-                                	Info *info = findNode(name,symTblLevel());
+                                	Info *info = findNode(name);
                                 	if (info == NULL)
                                 		info = createNodeInfo(name,-1,-1,"var");
                                 	yylval.node = createNode(NULL,NULL,info,"var");
