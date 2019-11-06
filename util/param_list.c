@@ -13,7 +13,8 @@ int isEmpty(){
 
 void insertParam(Info *info){
 	ParamsList *aux2 = (ParamsList *) malloc(sizeof(ParamsList));
-	aux2->info = createNodeInfo(info->name,info->value,info->offSet,info->type);
+	aux2->info = info;
+	//aux2->info = createNodeInfo(info->name,info->value,info->offSet,info->type);
 	if (head2 == NULL)
 		head2 = tail2 = aux2;
 	else{
