@@ -36,10 +36,10 @@ char *currentType;
 
 prog:
     init                    {   
-                                generateDot($1,"dot_output.dot");
-                                printSymbolTable();
-                                //generateCod3DList($1);
-                                //printCod3DList(); 
+                                //generateDot($1,"dot_output.dot");
+                                //printSymbolTable();
+                                generateCod3DList($1);
+                                printCod3DList(); 
                             }  
 
 init:
@@ -49,30 +49,52 @@ init:
 
 funcList:
     func funcList           {   $$ = createNode($1,$2,NULL,"next"); }
-    | INTEGER MAIN '(' ')' '{' program '}' {  $$ = createNode($6,NULL,NULL,"main"); }
+    | INTEGER MAIN '(' ')' '{' program '}' {  
+                                                Info *info = createNodeInfo("main",-1,-1,"int");
+                                                $$ = createNode(NULL,$6,info,"function"); 
+                                           }
     ;
 
 func:
     type ID '(' paramList ')' block  {
-                                        decSymTblLevel();   
-                                        Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
-                                        info->level = symTblLevel();
-                                        insertInTable(info->name,1,getOffSet(),info->type,info->level,$4,"function");
-                                        $$ = createNode($4,$6,info,"function"); 
+                                        decSymTblLevel();
+                                        if ($2->info->offSet == -1){
+                                            $2->info->offSet = getOffSet();
+                                            $2->info->level = symTblLevel();
+                                            $2->info->type = currentType;
+                                            insertInTable($2->info->name,1,$2->info->offSet,currentType,symTblLevel(),$4,"function");
+                                        }
+                                        else{
+                                            Info *info = createNodeInfo($2->info->name,-1,getOffSet(),currentType);
+                                            info->level = symTblLevel();
+                                            $2->info = info;
+                                            insertInTable(info->name,1,info->offSet,currentType,symTblLevel(),$4,"function");
+                                        }         
+                                        $$ = createNode($4,$6,$2->info,"function"); 
                                      }
     | type ID '(' ')' block          {  
-                                        Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
-                                        info->level = symTblLevel();
-                                        insertInTable(info->name,1,getOffSet(),info->type,info->level,NULL,"function");
-                                        $$ = createNode(NULL,$5,info,"function"); 
+                                        if ($2->info->offSet == -1){
+                                            $2->info->offSet = getOffSet();
+                                            $2->info->level = symTblLevel();
+                                            $2->info->type = currentType;
+                                            insertInTable($2->info->name,1,$2->info->offSet,currentType,symTblLevel(),NULL,"function");
+                                        }
+                                        else{
+                                            Info *info = createNodeInfo($2->info->name,-1,getOffSet(),currentType);
+                                            info->level = symTblLevel();
+                                            $2->info = info;
+                                            insertInTable(info->name,1,info->offSet,currentType,symTblLevel(),NULL,"function");
+                                        }
+                                        $$ = createNode(NULL,$5,$2->info,"function");
                                      }
-    | EXTERN ID '(' paramList ')' ';' { 
-                                        Info *info = createNodeInfo($2->info->name,-1,-1,"extern");  
-                                        $$ = createNode($4,NULL,info,"function"); 
+    | EXTERN type ID '(' paramList ')' ';' { 
+                                        decSymTblLevel();
+                                        Info *info = createNodeInfo($3->info->name,-1,-1,currentType);  
+                                        $$ = createNode($5,NULL,info,"extern"); 
                                       }
-    | EXTERN ID '(' ')' ';'          {  
-                                        Info *info = createNodeInfo($2->info->name,-1,-1,"extern");
-                                        $$ = createNode(NULL,NULL,info,"function"); 
+    | EXTERN type ID '(' ')' ';'          {  
+                                        Info *info = createNodeInfo($3->info->name,-1,-1,currentType);
+                                        $$ = createNode(NULL,NULL,info,"extern"); 
                                      }
 
 paramList:
@@ -82,15 +104,15 @@ paramList:
                 push(p);
             } ',' paramList   
                             {   
-                                Info *info = createNodeInfo($2->info->name,-1,-1,top()->else_tag);
-                                insertInTable(info->name,1,getOffSet(),info->type,symTblLevel(),NULL,"param");
+                                Info *info = createNodeInfo($2->info->name,-1,getOffSet(),top()->else_tag);  
+                                insertInTable(info->name,1,info->offSet,info->type,symTblLevel(),NULL,"param");
                                 pop();
                                 $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),$5,NULL,"next_arg"); 
                             }
-    | type ID               {  
+    | type ID               {   
                                 incSymTblLevel();
-                                Info *info = createNodeInfo($2->info->name,-1,-1,currentType);
-                                insertInTable(info->name,1,getOffSet(),info->type,symTblLevel(),NULL,"param"); 
+                                Info *info = createNodeInfo($2->info->name,-1,getOffSet(),currentType);
+                                insertInTable(info->name,1,info->offSet,info->type,symTblLevel(),NULL,"param"); 
                                 $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),NULL,NULL,"next_arg"); 
                             }   
     ;
@@ -210,7 +232,7 @@ expr:
                                 printf("Undeclared function %s\n", $1->info->name);
                                 exit(1);
                             }       
-                            $$ = createNode(NULL,$3,info,"call"); }
+                            $$ = createNode($3,NULL,info,"call"); }
     ;
 
 exprList:

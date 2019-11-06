@@ -53,7 +53,13 @@ typedef enum {
 	ENDIF,
 	MIDWHILE,
 	ENDWHILE,
-	PRINTBOOL	
+	PRINTBOOL,
+	FUNCTION,
+	EXTERN_FUNC,
+	ENDFUNCTION,
+	CALL,
+	FUNC_RETURN,
+	LOAD
 } Op;
 
 typedef struct Cod3D {
@@ -73,5 +79,10 @@ typedef struct StackNode {
 	LabelPair *pair;
 	struct StackNode *next; 
 } StackNode;
+
+typedef struct ParamsList{
+	Info *info;
+	struct ParamsList *next;
+} ParamsList;
 
 #endif

@@ -1,18 +1,15 @@
-int sum3 (int x, int y, int z, int x2, int y2, int z2){
+int sum3 (bool x, int y, int z, int x2, bool y2, bool z2){
 	var int x2 = x;
-	return x + y + z;
+	return y + z;
 }
 int sum(int x){
+	return x + 10;
 }
-int a(){
-	
-}
-int b(){
-	
-}
-bool c(bool ca){
-	
+
+bool not(bool x){
+	return !x;	
 }
 int main () {
-	var int x;
+	var int x = sum3(2+3,4*10,5*5,6,7,8,9);
+	return 0;
 }

@@ -8,6 +8,7 @@
 #include "offset_generator.h"
 #include "symbol_table_utilities.h"
 #include "label_stack.h"
+#include "param_list.h"
 
 Cod3D *head, *tail;
 
@@ -165,6 +166,34 @@ Info *generateCod3DList(TreeNode *t) {
 		return NULL;
 	}
 	else if (strcmp(t->label,"function")==0){
+		Op opCod = FUNCTION;
+		insertCod3D(opCod,t->info,NULL,NULL);
+		generateCod3DList(t->rightChild);
+		opCod = ENDFUNCTION;
+		insertCod3D(opCod,NULL,NULL,NULL);
+		return NULL;
+	}
+	else if (strcmp(t->label,"call")==0){
+		Info *info = generateCod3DList(t->leftChild);
+		Op opCod = LOAD;
+		while (isEmpty()==0){
+			insertCod3D(opCod,getParam(),NULL,NULL);
+			removeParam();
+		}
+		opCod = CALL;
+		Info *res = generateNextTmp(t->info->type);
+		insertCod3D(opCod,t->info,NULL,res);
+		return res;
+	}
+	else if (strcmp(t->label,"actual_arg")==0){
+		insertParam(generateCod3DList(t->leftChild));
+		if (t->rightChild != NULL)
+			generateCod3DList(t->rightChild);
+		return NULL;
+	}
+	else if (strcmp(t->label,"return")==0){
+		Op opCod = FUNC_RETURN;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
 	if (strcmp(t->label,"next")==0)
@@ -235,6 +264,24 @@ char* OpCodName(int opCod){
 			break;
 		case 20:
 			return "PRINTB";
+			break;
+		case 21:
+			return "FUNC";
+			break;
+		case 22:
+			return "RETURN";
+			break;
+		case 23:
+			return "ENDFUNC";
+			break;
+		case 24:
+			return "CALL";
+			break;
+		case 25:
+			return "RETURN";
+			break;
+		case 26:
+			return "LOAD";
 		default:
 			return NULL;
 	}

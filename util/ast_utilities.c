@@ -273,7 +273,7 @@ char *generateNextName(TreeNode *t){
 	else if (strcmp(t->label,"while")==0)
 		sprintf(name,"while%d",whileCount++);
 	else if (strcmp(t->label,"function")==0)
-		sprintf(name,"%s%d",t->info->name,functionCount++);
+		sprintf(name,"%s%s%d",t->info->type,t->info->name,functionCount++);
 	else if (strcmp(t->label,"main")==0)
 		sprintf(name,"main");
 	else if (strcmp(t->label,"formal_arg")==0)
@@ -285,7 +285,7 @@ char *generateNextName(TreeNode *t){
 	else if (strcmp(t->label,"call")==0)
 		sprintf(name,"call%s%d",t->info->name,callCount++);
 	else if (strcmp(t->label,"actual_arg")==0)
-		sprintf(name,"actual_arg%d",actualArgCount++);
+		sprintf(name,"%sactual_arg%d",checkTypesCorrectnes(t->leftChild),actualArgCount++);
 	return name;
 }
 
