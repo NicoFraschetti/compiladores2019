@@ -12,6 +12,7 @@ typedef struct Info {
 	int offSet;
 	char *type;
 	int level;
+	int lastOffSet;
 } Info;
 
 typedef struct ListNode {

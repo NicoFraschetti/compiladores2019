@@ -26,4 +26,8 @@ void insertInTable(char *name, int initialized, int offset, char *type, int lvl,
 
 void printSymbolTable();
 
+int paramListSize(TypesList *h);
+
+int paramTreeSize(TreeNode *tree);
+
 #endif

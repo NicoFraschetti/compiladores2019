@@ -20,13 +20,26 @@ void incSymTblLevel(){
 
 void clearLevel(){
 	ListNode *aux = p;
-	ListNode *aux2;
-	while (aux != NULL && aux->info->level == level){
-		aux2 = aux;
-		aux = aux->next;
-		free(aux2);
+	ListNode *aux2 = NULL;
+	int first = 1;
+	while (aux != NULL){
+		if (aux->info->level == level){
+			ListNode *aux3 = aux2; 
+			if (aux2 != NULL)
+				aux2->next = aux->next;
+			aux3 = aux;
+			aux = aux->next;
+			free(aux3);
+		}
+		else{
+			if (first++ == 1)
+				p = aux;
+			aux2 = aux;
+			aux = aux->next;
+		}
 	}
-	p = aux;
+	if (first == 1)
+		p = NULL;
 }
 
 void decSymTblLevel(){
@@ -131,6 +144,24 @@ void printSymbolTable(){
 		aux = aux->next;
 	}
 	printf("]\n");
+}
+
+int paramListSize(TypesList *h){
+	int size = 0;
+	while (h != NULL){
+		size++;
+		h = h->next;
+	}
+	return size;
+}
+
+int paramTreeSize(TreeNode *tree){
+	int size = 0;
+	while (tree != NULL){
+		size++;
+		tree = tree->rightChild;
+	}
+	return size;
 }
 
 #endif

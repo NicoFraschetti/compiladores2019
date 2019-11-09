@@ -44,6 +44,8 @@ char *generateNextLabel(){
 	return name;
 }
 
+int countParams = 0;
+
 Info *generateCod3DList(TreeNode *t) {
 	if (t==NULL)
 		return NULL;
@@ -167,14 +169,17 @@ Info *generateCod3DList(TreeNode *t) {
 	}
 	else if (strcmp(t->label,"function")==0){
 		Op opCod = FUNCTION;
+		//if (strcmp(t->info->name,"main")!=0)
+		resetOffSet(t->info->lastOffSet);
 		insertCod3D(opCod,t->info,NULL,NULL);
 		generateCod3DList(t->rightChild);
+		t->info->lastOffSet = offSet();
 		opCod = ENDFUNCTION;
 		insertCod3D(opCod,NULL,NULL,NULL);
 		return NULL;
 	}
 	else if (strcmp(t->label,"call")==0){
-		Info *info = generateCod3DList(t->leftChild);
+		generateCod3DList(t->leftChild);
 		Op opCod = LOAD;
 		while (isEmpty()==0){
 			insertCod3D(opCod,getParam(),NULL,NULL);
@@ -186,9 +191,17 @@ Info *generateCod3DList(TreeNode *t) {
 		return res;
 	}
 	else if (strcmp(t->label,"actual_arg")==0){
-		insertParam(generateCod3DList(t->leftChild));
-		if (t->rightChild != NULL)
-			generateCod3DList(t->rightChild);
+		if (countParams++<6){
+			insertParam(generateCod3DList(t->leftChild));
+			if (t->rightChild != NULL)
+				generateCod3DList(t->rightChild);
+	  	}
+	  	else{
+	  		if (t->rightChild != NULL){
+	  			generateCod3DList(t->rightChild);
+	  		}
+	  		insertParam(generateCod3DList(t->leftChild));
+	  	}
 		return NULL;
 	}
 	else if (strcmp(t->label,"return")==0){
@@ -269,7 +282,7 @@ char* OpCodName(int opCod){
 			return "FUNC";
 			break;
 		case 22:
-			return "RETURN";
+			return "EXTERN";
 			break;
 		case 23:
 			return "ENDFUNC";
@@ -307,6 +320,8 @@ void printCod3DList(){
 	}
 }
 
+int loadCount = 0;
+
 void generateAssembly(TreeNode *t, char *fileName){
 	checkTypesCorrectnes(t);
 	generateCod3DList(t);
@@ -315,9 +330,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 	strncpy(subStr,fileName,strlen(fileName)-3);
 	strcat(subStr,"s");
 	FILE *f = fopen(subStr,"w");
-	fprintf(f,"%s\n","	.globl main");
-	fprintf(f,"%s\n","main:");
-	fprintf(f, "	enter	$%d, $0\n", -offSet()+16);
+	//fprintf(f,"%s\n","	.globl main");
+	//fprintf(f,"%s\n","main:");
 	char *else_lbl, *endif_lbl;
 	while (aux != NULL){
 		switch(aux->opCod){
@@ -538,12 +552,87 @@ void generateAssembly(TreeNode *t, char *fileName){
 					fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
 				fprintf(f, "	call	printb\n");
 				break;
+			case 21: //function
+				fprintf(f,"    .globl %s\n", aux->arg1->name);
+				fprintf(f,"%s:\n",aux->arg1->name);
+				if (strcmp(aux->arg1->name,"main")==0)
+					fprintf(f, "	enter	$%d, $0\n", -offSet()+16);
+				else{
+					ListNode *functionNode = findListNode(aux->arg1->name);
+					int paramNumber = paramListSize(functionNode->head);
+					fprintf(f, "	enter	$%d, $0\n", -aux->arg1->lastOffSet);
+					if (paramNumber >= 1)
+						fprintf(f, "	movq	%%rdi, -8(%%rbp)\n");
+					if (paramNumber >= 2)
+						fprintf(f, "	movq	%%rsi, -16(%%rbp)\n");
+					if (paramNumber >= 3)
+						fprintf(f, "	movq	%%rdx, -24(%%rbp)\n");
+					if (paramNumber >= 4)
+						fprintf(f, "	movq	%%rcx, -32(%%rbp)\n");
+					if (paramNumber >= 5)
+						fprintf(f, "	movq	%%r8, -40(%%rbp)\n");
+					if (paramNumber >= 6)
+						fprintf(f, "	movq	%%r9, -48(%%rbp)\n");
+				}
+				break;
+			case 22:
+				break;
+			case 23://endfunction
+				fprintf(f, "   	leave\n");
+				fprintf(f, "	ret\n");
+				break;
+			case 24: //call
+				fprintf(f, "	call 	%s\n", aux->arg1->name);
+				fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->result->offSet);
+				if (loadCount > 6)
+					fprintf(f, "	addq 	$%d, %%rsp\n", (loadCount - 6) * 8);
+				loadCount = 0;			
+				break;
+			case 25: //return
+				if (aux->arg1->name == NULL)
+					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else
+                	fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg1->offSet);
+				break;
+			case 26: //load
+				loadCount++;
+				if (aux->arg1->name == NULL){
+					if (loadCount == 1)
+						fprintf(f, "	movq	$%d, %%rdi\n", aux->arg1->value);
+					else if (loadCount == 2)
+						fprintf(f, "	movq	$%d, %%rsi\n", aux->arg1->value);
+					else if (loadCount == 3)
+						fprintf(f, "	movq	$%d, %%rdx\n", aux->arg1->value);
+					else if (loadCount == 4)
+						fprintf(f, "	movq	$%d, %%rcx\n", aux->arg1->value);
+					else if (loadCount == 5)
+						fprintf(f, "	movq	$%d, %%r8\n", aux->arg1->value);
+					else if (loadCount == 6)
+						fprintf(f, "	movq	$%d, %%r9\n", aux->arg1->value);
+					else
+						fprintf(f, "	pushq	$%d\n", aux->arg1->value);
+				}
+				else{
+					if (loadCount == 1)
+						fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
+					else if (loadCount == 2)
+						fprintf(f, "	movq	%d(%%rbp), %%rsi\n", aux->arg1->offSet);
+					else if (loadCount == 3)
+						fprintf(f, "	movq	%d(%%rbp), %%rdx\n", aux->arg1->offSet);
+					else if (loadCount == 4)
+						fprintf(f, "	movq	%d(%%rbp), %%rcx\n", aux->arg1->offSet);
+					else if (loadCount == 5)
+						fprintf(f, "	movq	%d(%%rbp), %%r8\n", aux->arg1->offSet);
+					else if (loadCount == 6)
+						fprintf(f, "	movq	%d(%%rbp), %%r9\n", aux->arg1->offSet);
+					else
+						fprintf(f, "	pushq	%d(%%rbp)\n", aux->arg1->offSet);	
+				}
+				break;
 
 		}	
 		aux = aux->next;
 	}
-	fprintf(f, "	%s\n","leave");
-	fprintf(f, "	%s\n","ret");
 	fclose(f);	
 }
 

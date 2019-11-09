@@ -1,16 +1,10 @@
-int sum3 (bool x, int y, int z, int x2, bool y2, bool z2){
-	var int x2 = x;
-	return y + z;
+int foo (int x, int y, int z){
+	return x + y + z;
 }
-int sum(int x){
-	return x + 10;
-}
-
-bool not(bool x){
-	return !x;	
-}
-int main () {
-	var int x2 = 45 / 5;
-	var int x = sum3(2+3,4*10,5*5,x2,7,x2 + 8,9);
+int imprimir(){
+	printi (foo(45,7,9));
 	return 0;
+}
+int main() {
+	return imprimir();
 }
