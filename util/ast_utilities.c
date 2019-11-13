@@ -5,6 +5,7 @@
 #include <string.h>
 #include "symbol_table_utilities.h"
 #include "ast_utilities.h"
+#include "param_list.h"
 
 TreeNode *root;
 
@@ -26,7 +27,7 @@ char *checkTypesCorrectnes(TreeNode *t){
 	else if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0){
 		return t->label;
 	}
-	else if (strcmp(t->label,"var")==0){
+	else if (strcmp(t->label,"var")==0 || strcmp(t->label,"global")==0){
 		return t->info->type;
 	}
 	else if (strcmp(t->label,"asig")==0){
@@ -37,16 +38,12 @@ char *checkTypesCorrectnes(TreeNode *t){
 			exit(1);
 		}
 	}
-	else if (strcmp(t->label,"printi")==0){
-		if (strcmp(checkTypesCorrectnes(t->leftChild),"int")!=0){
-			printf("printi must only be used for integers\n");
-			exit(1);	
-		}
-	}
-	else if (strcmp(t->label,"printb")==0){
-		if (strcmp(checkTypesCorrectnes(t->leftChild),"bool")!=0){
-			printf("printb must only be used for booleans\n");
-			exit(1);	
+	else if (strcmp(t->label,"global_asig")==0){
+		char *leftChildType = checkTypesCorrectnes(t->leftChild);
+		char *rightChildType = checkTypesCorrectnes(t->rightChild);
+		if (strcmp(leftChildType,rightChildType)!=0){
+			printf("Assignment error\n");
+			exit(1);
 		}
 	}
 	else if (strcmp(t->label,"add")==0){
@@ -165,6 +162,43 @@ char *checkTypesCorrectnes(TreeNode *t){
 		}
 		checkTypesCorrectnes(t->rightChild);
 	}
+	else if (strcmp(t->label,"function")==0){
+		checkTypesCorrectnes(t->rightChild);
+		return t->info->type;
+	}
+	else if (strcmp(t->label,"extern")==0){
+		return t->info->type;
+	}
+	else if (strcmp(t->label,"return")==0){
+		checkTypesCorrectnes(t->leftChild);
+		return "";
+	}
+	else if (strcmp(t->label,"call")==0){
+		TreeNode *currentArg = t->leftChild;
+		while (currentArg!=NULL){
+			insertParamType(checkTypesCorrectnes(currentArg->leftChild));
+			currentArg = currentArg->rightChild;
+		}
+		ListNode *aux = findListNode(t->info->name);
+		TypesList *paramType = aux->head;
+		while(!isEmpty()){
+			if (paramType==NULL){
+				printf("Function %s called with too many arguments \n",t->info->name);
+				exit(1);
+			}
+			else if(strcmp(getTypeParam(),paramType->type)!=0){
+				printf("Incorrect argument type in function %s \n",t->info->name);
+				exit(1);
+			}
+			removeParam();
+			paramType = paramType->next;
+		}
+		if (paramType!=NULL){
+			printf("Function %s called with too few arguments \n",t->info->name);
+			exit(1);
+		}
+		return t->info->type;
+	}
 	if (strcmp(t->label,"next")==0)
 		checkTypesCorrectnes(t->rightChild);
 
@@ -223,6 +257,9 @@ int printbCount = 0;
 int ifCount = 0;
 int ifElseCount = 0;
 int whileCount = 0;
+int globalCount = 0;
+int globalAsigCount = 0;
+int globalDeclCount = 0;
 
 char *generateNextName(TreeNode *t){
 	char *name = (char *) malloc(sizeof(char *)*10);
@@ -230,10 +267,16 @@ char *generateNextName(TreeNode *t){
 		sprintf(name,"%d%d",t->info->value,intCount++);
 	else if (strcmp(t->label,"var")==0)
 		sprintf(name,"%s%d%d%d%s",t->info->name,varCount++,-t->info->offSet,t->info->level,t->info->type);
+	else if (strcmp(t->label,"global")==0)
+		sprintf(name,"glbl%s%d%d",t->info->name,t->info->level,globalCount++);
 	else if (strcmp(t->label,"next")==0)
 		sprintf(name,"next%d",nextCount++);
 	else if (strcmp(t->label,"asig")==0)
 		sprintf(name,"asig%d",asigCount++);
+	else if (strcmp(t->label,"global_decl")==0)
+		sprintf(name,"gldecl%d",globalDeclCount++);
+	else if (strcmp(t->label,"global_asig")==0)
+		sprintf(name,"glasig%d",globalAsigCount++);
 	else if (strcmp(t->label,"add")==0)
 		sprintf(name,"add%d",addCount++);
 	else if (strcmp(t->label,"sub")==0)
@@ -256,10 +299,6 @@ char *generateNextName(TreeNode *t){
 		sprintf(name,"or%d",orCount++);
 	else if (strcmp(t->label,"not")==0)
 		sprintf(name,"not%d",notCount++);
-	else if (strcmp(t->label,"printi")==0)
-		sprintf(name,"printi%d",printiCount++);
-	else if (strcmp(t->label,"printb")==0)
-		sprintf(name,"printb%d",printbCount++);
 	else if (strcmp(t->label,"bool")==0){
 		if (t->info->value == 0)
 			sprintf(name,"false%d",falseCount++);
@@ -274,6 +313,8 @@ char *generateNextName(TreeNode *t){
 		sprintf(name,"while%d",whileCount++);
 	else if (strcmp(t->label,"function")==0)
 		sprintf(name,"%s%s%d",t->info->type,t->info->name,functionCount++);
+	else if (strcmp(t->label,"extern")==0)
+		sprintf(name,"extern%s%s%d",t->info->type,t->info->name,externCount++);
 	else if (strcmp(t->label,"main")==0)
 		sprintf(name,"main");
 	else if (strcmp(t->label,"formal_arg")==0)
@@ -285,8 +326,9 @@ char *generateNextName(TreeNode *t){
 	else if (strcmp(t->label,"call")==0)
 		sprintf(name,"call%s%d",t->info->name,callCount++);
 	else if (strcmp(t->label,"actual_arg")==0)
-		sprintf(name,"%sactual_arg%d",checkTypesCorrectnes(t->leftChild),actualArgCount++);
+		sprintf(name,"actual_arg%d",actualArgCount++);
 	return name;
+
 }
 
 void generateDot2(TreeNode *t, FILE *f, char *parentName){

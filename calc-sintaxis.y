@@ -22,10 +22,10 @@ int cantParams = 0;
  
 %union { struct TreeNode *node;}
  
-%token<node> INT ID PRINTI PRINTB
-%token VAR AND OR INTEGER BOOL TRUE FALSE WHILE IF ELSE MAIN EXTERN RETURN
+%token<node> INT ID TRUE FALSE
+%token VAR AND OR INTEGER BOOL WHILE IF ELSE MAIN EXTERN RETURN
 
-%type<node> program decls decl statements statement expr block init func funcList paramList exprList  
+%type<node> program decls decl statements statement expr block init func funcList paramList exprList globalDecls globalDecl type
 
 %left AND OR
 %left '!'
@@ -38,15 +38,15 @@ int cantParams = 0;
 
 prog:
     init                    {   
-                                //generateDot($1,"dot_output.dot");
-                                //printSymbolTable();
+                                generateDot($1,"dot_output.dot");
+                                printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
-                                //printCod3DList(); 
+                                printCod3DList(); 
                             }  
 
 init:
-    decls funcList          {   $$ = createNode($1,$2,NULL,"next"); }
+    globalDecls funcList    {   $$ = createNode($1,$2,NULL,"next"); }
     | funcList              {   $$ = createNode(NULL,$1,NULL,"next"); }
     ; 
 
@@ -67,9 +67,9 @@ func:
                                     printf("function %s already declared\n",$2->info->name);
                                     exit(1);
                                 }
-                                $2->info->type = currentType;
+                                $2->info->type = $1->label;
                                 $2->info->level = symTblLevel()-1;
-                                insertInTable($2->info->name,1,-1,currentType,symTblLevel()-1,$4,"function");
+                                insertInTable($2->info->name,1,-1,$1->label,symTblLevel()-1,$4,"function");
                                } block  {
                                         decSymTblLevel();         
                                         $2->info->lastOffSet = offSet();
@@ -88,13 +88,31 @@ func:
                                         $$ = createNode(NULL,$6,$2->info,"function");
                                      }
     | EXTERN type ID '(' paramList ')' ';' { 
+                                        cantParams = 0; 
+                                        resetOffSet(-(paramTreeSize($5)*8));
                                         decSymTblLevel();
-                                        Info *info = createNodeInfo($3->info->name,-1,-1,currentType);  
-                                        $$ = createNode($5,NULL,info,"extern"); 
+                                        ListNode *aux = findListNode($3->info->name);
+                                        if (aux!=NULL){ //Undeclared variable
+                                            printf("function %s already declared\n",$3->info->name);
+                                            exit(1);
+                                        }   
+                                        $3->info->type = $2->label;
+                                        $3->info->level = symTblLevel();
+                                        insertInTable($3->info->name,1,-1,$2->label,symTblLevel(),$5,"function");
+                                        $3->info->lastOffSet = offSet();
+                                        $$ = createNode($5,NULL,$3->info,"extern");   
                                       }
-    | EXTERN type ID '(' ')' ';'          {  
-                                        Info *info = createNodeInfo($3->info->name,-1,-1,currentType);
-                                        $$ = createNode(NULL,NULL,info,"extern"); 
+    | EXTERN type ID '(' ')' ';'     {  
+                                        ListNode *aux = findListNode($3->info->name);
+                                        if (aux!=NULL){ //Undeclared variable
+                                            printf("function %s already declared\n",$3->info->name);
+                                            exit(1);
+                                        }   
+                                        $3->info->type = currentType;
+                                        $3->info->level = symTblLevel();
+                                        insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"function");
+                                        $3->info->lastOffSet = offSet();
+                                        $$ = createNode(NULL,NULL,$3->info,"extern");  
                                      }
 
 paramList:
@@ -146,13 +164,13 @@ decl:
                                     $3->info->offSet = getOffSet();
                                     $3->info->level = symTblLevel();
                                     $3->info->type = currentType;
-                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
+                                    insertInTable($3->info->name,0,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  else{
                                     Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
                                     info->level = symTblLevel();
                                     $3->info = info;
-                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
+                                    insertInTable($3->info->name,0,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
                                  }
                                  $$ = NULL;
                             }
@@ -173,6 +191,55 @@ decl:
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
     ;
+globalDecls:
+    globalDecls globalDecl  {    $$ = createNode($1,$2,NULL,"next"); }
+    |                       {    $$ = NULL; }
+    ;
+globalDecl:
+    VAR type ID ';'         {    
+                                $3->info->level = symTblLevel();
+                                $3->info->type = currentType;
+                                free($3->label);
+                                $3->label = (char *) malloc(10);
+                                strcpy($3->label,"global");
+                                //$3->label = "global";    
+                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
+                                $$ = createNode($3,NULL,NULL,"global_decl");
+                            }
+    | VAR type ID '=' INT ';'  
+                            {    
+                                $3->info->level = symTblLevel();
+                                $3->info->type = currentType;
+                                free($3->label);
+                                $3->label = (char *) malloc(10);
+                                strcpy($3->label,"global");
+                                //$3->label = "global";
+                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
+                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                            }
+    | VAR type ID '=' TRUE ';'
+                            {    
+                                $3->info->level = symTblLevel();
+                                $3->info->type = currentType;
+                                free($3->label);
+                                $3->label = (char *) malloc(10);
+                                strcpy($3->label,"global");
+                                //$3->label = "global";
+                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
+                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                            }
+    | VAR type ID '=' FALSE ';'
+                            {    
+                                $3->info->level = symTblLevel();
+                                $3->info->type = currentType;
+                                free($3->label);
+                                $3->label = (char *) malloc(10);
+                                strcpy($3->label,"global");
+                                //$3->label = "global";
+                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
+                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                            }
+    ;
 
 statements:
     statements statement    {    $$ = createNode($1,$2,NULL,"next"); }
@@ -181,19 +248,16 @@ statements:
 
 statement: 
     ID '=' expr ';'         {   
-                                 //updateTable($1->info->name,evalTree($3),symTblLevel());
                                  ListNode *aux = findListNode($1->info->name);
                                  if (aux==NULL){ //Undeclared variable
                                     printf("undeclared variable %s\n",$1->info->name);
                                     exit(1);
                                  }
+                                 if (strcmp(aux->label,"global")==0)
+                                    $1->label = "global";
                                  aux->initialized = 1;
                                  $$ = createNode($1,$3,NULL,"asig"); 
                             }
-    | PRINTI '(' expr ')' ';'   
-                            {    $$ = createNode($3,NULL,NULL,"printi"); }
-    | PRINTB '(' expr ')' ';'
-                            {    $$ = createNode($3,NULL,NULL,"printb"); }
     | IF '(' expr ')' block ELSE block 
                             {    $$ = createNode($3,createNode($5,$7,NULL,"if_else"),NULL,"if"); }
     | IF '(' expr ')' block {    $$ = createNode($3,$5,NULL,"if"); }
@@ -221,7 +285,10 @@ expr:
                         printf("Unitialized Variable %s\n", $1->info->name);
                         exit(1);   
                     }
-                    $$ = createNode(NULL,NULL,aux->info,"var");
+                    if (strcmp(aux->label,"global")==0)
+                        $$ = createNode(NULL,NULL,aux->info,"global");
+                    else
+                        $$ = createNode(NULL,NULL,aux->info,"var");
                 }
     | TRUE              {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,1,-1,"bool"),"bool"); }
     | FALSE             {   $$ = createNode(NULL,NULL,createNodeInfo(NULL,0,-1,"bool"),"bool"); }
@@ -266,8 +333,12 @@ exprList:
     ;
 
 type:
-    INTEGER             {   currentType = "int"; }
-    | BOOL              {   currentType = "bool"; }
+    INTEGER             {   currentType = "int"; 
+                            $$ = createNode(NULL,NULL,NULL,"int");
+                        }
+    | BOOL              {   currentType = "bool"; 
+                            $$ = createNode(NULL,NULL,NULL,"bool");
+                        }
     ;
 
 %%

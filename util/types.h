@@ -40,7 +40,7 @@ typedef enum {
 	SUBI,
 	DIVI,
 	MODI,
-	PRINT,
+	GLOBAL_DECL,
 	LESS,
 	GREATER,
 	EQUAL,
@@ -54,7 +54,7 @@ typedef enum {
 	ENDIF,
 	MIDWHILE,
 	ENDWHILE,
-	PRINTBOOL,
+	GLOBAL_ASIG,
 	FUNCTION,
 	EXTERN_FUNC,
 	ENDFUNCTION,
@@ -80,10 +80,5 @@ typedef struct StackNode {
 	LabelPair *pair;
 	struct StackNode *next; 
 } StackNode;
-
-typedef struct ParamsList{
-	Info *info;
-	struct ParamsList *next;
-} ParamsList;
 
 #endif

@@ -20,10 +20,6 @@ digito [0-9]
 
 var						  	  	{ 	return VAR; 	}
 
-printi						  	{ 	return PRINTI; 	}
-
-printb							{	return PRINTB;	}
-
 true						  	{ 	return TRUE; 	}
 
 false						  	{ 	return FALSE; 	}

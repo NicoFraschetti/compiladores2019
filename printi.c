@@ -1,12 +1,14 @@
 #include <stdio.h>
 
-void printi(int x){
+int printi(int x){
 	printf("%d\n", x);
+	return 0;
 }
 
-void printb(int x){
+int printb(int x){
 	if (x)
 		printf("true\n");
 	else
 		printf("false\n");
+	return 0;
 }

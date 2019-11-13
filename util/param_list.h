@@ -6,10 +6,14 @@ int isEmpty();
 
 void insertParam(Info *info);
 
+void insertParamType(char *type);
+
 Info *getParam();
+
+char *getTypeParam();
 
 void removeParam();
 
-void printParamsList();
+void printParamTypeList();
 
 #endif

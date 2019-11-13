@@ -1,10 +1,14 @@
-int foo (int x, int y, int z){
-	return x + y + z;
-}
-int imprimir(){
-	printi (foo(45,7,9));
-	return 0;
+var int n = 1;
+extern int printi(int x);
+int fact(int n){
+	if (n==0){
+		return 1;
+	}
+	else{
+		return n * fact(n-1);
+	}
 }
 int main() {
-	return imprimir();
+	var int b = fact(4);
+	return printi(b);
 }

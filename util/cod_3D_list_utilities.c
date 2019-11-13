@@ -12,6 +12,20 @@
 
 Cod3D *head, *tail;
 
+/*ListNode *paramHead, *paramTail;
+
+void insertParam(Info *info){
+	ListNode *ptr = (ListNode *) malloc(sizeof(ListNode));
+	ptr->info = info;
+	ptr->next = NULL;
+	if (paramHead == NULL)
+		paramHead = paramTail = ptr;
+	else{
+		paramTail->next = ptr;
+		paramTail = ptr;
+	}
+}*/
+
 void insertCod3D(Op opCod, Info *arg1, Info *arg2, Info *res) {
 	Cod3D *aux = (Cod3D *) malloc(sizeof(Cod3D));
 	aux->opCod = opCod;
@@ -46,12 +60,16 @@ char *generateNextLabel(){
 
 int countParams = 0;
 
+int debug_pasada = 1;
+
 Info *generateCod3DList(TreeNode *t) {
 	if (t==NULL)
 		return NULL;
+	//printf("pasada : %d \n\n", debug_pasada++);
+	//printCod3DList();
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->leftChild);
-	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0 || strcmp(t->label,"var")==0)
+	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0 || strcmp(t->label,"var")==0 || strcmp(t->label,"global")==0)
 		return t->info;
 	else if (strcmp(t->label,"asig")==0){
 		Op opCod = ASIGI;
@@ -157,19 +175,8 @@ Info *generateCod3DList(TreeNode *t) {
 		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
-	else if (strcmp(t->label,"printi")==0){
-		Op opCod = PRINT;
-		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
-		return NULL;
-	}
-	else if (strcmp(t->label,"printb")==0){
-		Op opCod = PRINTBOOL;
-		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
-		return NULL;
-	}
 	else if (strcmp(t->label,"function")==0){
 		Op opCod = FUNCTION;
-		//if (strcmp(t->info->name,"main")!=0)
 		resetOffSet(t->info->lastOffSet);
 		insertCod3D(opCod,t->info,NULL,NULL);
 		generateCod3DList(t->rightChild);
@@ -178,10 +185,15 @@ Info *generateCod3DList(TreeNode *t) {
 		insertCod3D(opCod,NULL,NULL,NULL);
 		return NULL;
 	}
+	else if (strcmp(t->label,"extern")==0)
+		return NULL;
 	else if (strcmp(t->label,"call")==0){
+		countParams = 0;
 		generateCod3DList(t->leftChild);
+		//printParamList()
+		int i = 0;
 		Op opCod = LOAD;
-		while (isEmpty()==0){
+		while (!isEmpty()){
 			insertCod3D(opCod,getParam(),NULL,NULL);
 			removeParam();
 		}
@@ -209,6 +221,16 @@ Info *generateCod3DList(TreeNode *t) {
 		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
 		return NULL;
 	}
+	else if (strcmp(t->label,"global_decl")==0){
+		Op opCod = GLOBAL_DECL;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),NULL,NULL);
+		return NULL;
+	}
+	else if (strcmp(t->label,"global_asig")==0){
+		Op opCod = GLOBAL_ASIG;
+		insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
+		return NULL;
+	}
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->rightChild);
 }
@@ -234,7 +256,7 @@ char* OpCodName(int opCod){
 			return "MOD";
 			break;
 		case 6:
-			return "PRINT";
+			return "GLOBAL_DECL";
 			break;
 		case 7:
 			return "LESSER";
@@ -276,7 +298,7 @@ char* OpCodName(int opCod){
 			return "ENDWHILE";
 			break;
 		case 20:
-			return "PRINTB";
+			return "GLOBAL_ASIG";
 			break;
 		case 21:
 			return "FUNC";
@@ -336,20 +358,42 @@ void generateAssembly(TreeNode *t, char *fileName){
 	while (aux != NULL){
 		switch(aux->opCod){
 			case 0:	//asig
-				if (aux->arg2->name == NULL)
-					fprintf(f, "	movq	$%d, %d(%%rbp)\n", aux->arg2->value, aux->arg1->offSet);
-				else {
-					fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg2->offSet);
-					fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->arg1->offSet);
+				if (aux->arg1->offSet == -1){ 
+					if (aux->arg2->name == NULL)
+						fprintf(f, "	movq	$%d, %s(%%rip)\n", aux->arg2->value, aux->arg1->name);
+					else if (aux->arg2->offSet == -1){
+						fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg2->name);
+						fprintf(f, "	movq	%%rax, %s(%%rip)\n", aux->arg1->name);
+					}
+					else{
+						fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg2->offSet);
+						fprintf(f, "	movq	%%rax, %s(%%rip)\n", aux->arg1->name);	
+					}
+				}
+				else{
+					if (aux->arg2->name == NULL)
+						fprintf(f, "	movq	$%d, %d(%%rbp)\n", aux->arg2->value, aux->arg1->offSet);
+					else if (aux->arg2->offSet == -1){
+						fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg2->name);
+						fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->arg1->offSet);
+					}
+					else {
+						fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg2->offSet);
+						fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->arg1->offSet);
+					}
 				}
 				break;
 			case 1:	//add
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	addq	$%d, %%rax\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	addq	%s(%%rip), %%rax\n", aux->arg2->name);
 				else 
 					fprintf(f, "	addq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
@@ -357,10 +401,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 2:	//mul
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	imulq	$%d, %%rax\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	imulq	%s(%%rip), %%rax\n", aux->arg2->name);
 				else 
 					fprintf(f, "	imulq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
@@ -368,10 +416,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 3:	//sub
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	subq	$%d, %%rax\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	subq	%s(%%rip), %%rax\n", aux->arg2->name);
 				else 
 					fprintf(f, "	subq	%d(%%rbp), %%rax\n",aux->arg2->offSet);
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n",aux->result->offSet);
@@ -379,11 +431,17 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 4:	//div
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
 				fprintf(f, "	cltd\n");
 				if (aux->arg2->name == NULL){
 					fprintf(f, "	movq	$%d, %%rbx\n", aux->arg2->value);
+					fprintf(f, "	idivq	%%rbx\n");
+				}
+				else if (aux->arg2->offSet == -1){
+					fprintf(f, "	movq	%s(%%rip), %%rbx\n", aux->arg2->name);
 					fprintf(f, "	idivq	%%rbx\n");
 				}
 				else 
@@ -393,6 +451,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 5:	//mod
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%rax\n",aux->arg1->offSet);
 				fprintf(f, "	cltd\n");
@@ -400,24 +460,28 @@ void generateAssembly(TreeNode *t, char *fileName){
 					fprintf(f, "	movq	$%d, %%rbx\n", aux->arg2->value);
 					fprintf(f, "	idivq	%%rbx\n");
 				}
+				else if (aux->arg2->offSet == -1){
+					fprintf(f, "	movq	%s(%%rip), %%rbx\n", aux->arg2->name);
+					fprintf(f, "	idivq	%%rbx\n");
+				}
 				else 
 					fprintf(f, "	idivq	%d(%%rbp)\n",aux->arg2->offSet);
 				fprintf(f, "	movq	%%rdx, %d(%%rbp)\n",aux->result->offSet);
 				break;
-			case 6:	//print
-				if (aux ->arg1->name == NULL)
-					fprintf(f, "	movq	$%d, %%rdi\n", aux->arg1->value);
-				else
-					fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
-				fprintf(f, "	call	printi\n");
+			case 6:	//global_decl
+				fprintf(f, "	.comm	%s,8,8\n", aux->arg1->name);
 				break;
 			case 7: //lesser
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	movq	$%d, %%r11\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r11\n", aux->arg2->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r11\n", aux->arg2->offSet);
 				fprintf(f, "	cmpq	%%r11, %%r10\n");
@@ -428,10 +492,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 8:	//greater
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	movq	$%d, %%r11\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r11\n", aux->arg2->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r11\n", aux->arg2->offSet);
 				fprintf(f, "	cmpq	%%r11, %%r10\n");
@@ -442,10 +510,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 9:	//equal
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	movq	$%d, %%r11\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r11\n", aux->arg2->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r11\n", aux->arg2->offSet);
 				fprintf(f, "	cmpq	%%r11, %%r10\n");
@@ -457,10 +529,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 				fprintf(f, "	movq	$1, %%rax\n");
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	andq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	andq	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	andq	%d(%%rbp), %%rax\n", aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	andq	$%d, %%rax\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	andq	%s(%%rip), %%rax\n", aux->arg2->name);
 				else
 					fprintf(f, "	andq	%d(%%rbp), %%rax\n", aux->arg2->offSet);
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->result->offSet);
@@ -469,10 +545,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 				fprintf(f, "	movq	$0, %%rax\n");
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	orq		$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	orq		%s(%%rip), %%rax\n", aux->arg1->name);
 				else
 					fprintf(f, "	orq		%d(%%rbp), %%rax\n", aux->arg1->offSet);
 				if (aux->arg2->name == NULL)
 					fprintf(f, "	orq		$%d, %%rax\n", aux->arg2->value);
+				else if (aux->arg2->offSet == -1)
+					fprintf(f, "	orq		%s(%%rip), %%rax\n", aux->arg2->name);
 				else
 					fprintf(f, "	orq		%d(%%rbp), %%rax\n", aux->arg2->offSet);
 				fprintf(f, "	movq	%%rax, %d(%%rbp)\n", aux->result->offSet);
@@ -480,6 +560,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 12: //not
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				fprintf(f, "	cmpq	$1, %%r10\n");
@@ -490,6 +572,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 13: //if
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq 	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				fprintf(f, "	cmpq	$0, %%r10\n");
@@ -538,6 +622,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 19: //endwhile
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
+				if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq 	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
 				fprintf(f, "	cmpq	$1, %%r10\n");
@@ -545,12 +631,14 @@ void generateAssembly(TreeNode *t, char *fileName){
 				pop();
 				fprintf(f, "	je 		%s\n", p->endif_tag);
 				break;
-			case 20: //printb
-				if (aux ->arg1->name == NULL)
-					fprintf(f, "	movq	$%d, %%rdi\n", aux->arg1->value);
-				else
-					fprintf(f, "	movq	%d(%%rbp), %%rdi\n", aux->arg1->offSet);
-				fprintf(f, "	call	printb\n");
+			case 20: //global_asig
+				fprintf(f, "	.globl	%s\n", aux->arg1->name);
+				fprintf(f, "	.data\n");
+				fprintf(f, "	.align 8\n");
+				fprintf(f, "	.type	%s, @object\n", aux->arg1->name);
+				fprintf(f, "	.size	%s, 8\n", aux->arg1->name);
+				fprintf(f, "%s:\n", aux->arg1->name);
+				fprintf(f, "	.quad	%d\n", aux->arg2->value);
 				break;
 			case 21: //function
 				fprintf(f,"    .globl %s\n", aux->arg1->name);
@@ -591,6 +679,8 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 25: //return
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%rax\n", aux->arg1->value);
+				else if (aux->arg1->offSet == -1)
+					fprintf(f, "	movq 	%s(%%rip), %%rax\n", aux->arg1->name);
 				else
                 	fprintf(f, "	movq	%d(%%rbp), %%rax\n", aux->arg1->offSet);
 				break;
@@ -611,6 +701,22 @@ void generateAssembly(TreeNode *t, char *fileName){
 						fprintf(f, "	movq	$%d, %%r9\n", aux->arg1->value);
 					else
 						fprintf(f, "	pushq	$%d\n", aux->arg1->value);
+				}
+				else if (aux->arg1->offSet == -1){
+					if (loadCount == 1)
+						fprintf(f, "	movq	%s(%%rip), %%rdi\n", aux->arg1->name);
+					else if (loadCount == 2)
+						fprintf(f, "	movq	%s(%%rip), %%rsi\n", aux->arg1->name);
+					else if (loadCount == 3)
+						fprintf(f, "	movq	%s(%%rip), %%rdx\n", aux->arg1->name);
+					else if (loadCount == 4)
+						fprintf(f, "	movq	%s(%%rip), %%rcx\n", aux->arg1->name);
+					else if (loadCount == 5)
+						fprintf(f, "	movq	%s(%%rip), %%r8\n", aux->arg1->name);
+					else if (loadCount == 6)
+						fprintf(f, "	movq	%s(%%rip), %%r9\n", aux->arg1->name);
+					else
+						fprintf(f, "	pushq	%s(%%rip)\n", aux->arg1->name);
 				}
 				else{
 					if (loadCount == 1)
