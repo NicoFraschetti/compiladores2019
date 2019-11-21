@@ -31,8 +31,6 @@ typedef struct TreeNode{
 	char *label;
 }TreeNode;
 
-//enum Op{ASIGI,ADDI,MULI,SUBI,DIVI,MODI,PRINT};
-
 typedef enum {
 	ASIGI,
 	ADDI,

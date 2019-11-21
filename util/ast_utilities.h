@@ -4,8 +4,6 @@
 
 TreeNode *createNode(TreeNode *lft, TreeNode *rgt, Info *info, char * lbl);
 
-int evalTree(TreeNode *t);
-
 char *checkTypesCorrectnes(TreeNode *t);
 
 Info *createNodeInfo(char *name, int value, int offset, char* type);

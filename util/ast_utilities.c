@@ -203,21 +203,6 @@ char *checkTypesCorrectnes(TreeNode *t){
 		checkTypesCorrectnes(t->rightChild);
 
 }
-int evalTree(TreeNode *t){
-	
-	if (strcmp(t->label,"int")==0 || strcmp(t->label,"var")==0)
-		return t->info->value;
-	else if (strcmp(t->label,"add")==0)
-		return evalTree(t->leftChild)+evalTree(t->rightChild);
-	else if (strcmp(t->label,"sub")==0)
-		return evalTree(t->leftChild)-evalTree(t->rightChild);
-	else if (strcmp(t->label,"mul")==0)
-		return evalTree(t->leftChild)*evalTree(t->rightChild);
-	else if (strcmp(t->label,"div")==0)
-		return evalTree(t->leftChild)/evalTree(t->rightChild);
-	else if (strcmp(t->label,"mod")==0)
-		return evalTree(t->leftChild)%evalTree(t->rightChild);
-}
 
 Info *createNodeInfo(char *name, int value, int offset, char *type){
 	Info *aux = (Info *) malloc(sizeof(Info));

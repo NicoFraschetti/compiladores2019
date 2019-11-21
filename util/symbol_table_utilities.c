@@ -86,21 +86,6 @@ Info *findNode(char *name){
 	return NULL;
 } 
 
-/*int findValue(char *name){
-	Info *info = findNode(name);
-	return info->value;
-}*/
-
-/*void updateTable(char *name, int value, int lvl) {
-	ListNode *aux = findListNode(name,lvl);
-	if (aux==NULL){ //Undeclared variable
-		printf("undeclared variable %s\n",name);
-		exit(1);
-	} 
-	aux->info->value = value;
-	aux->initialized = 1;
-}*/
-
 ListNode *findListNode(char *name){
 	ListNode *aux = p;
 	while (aux != NULL) {

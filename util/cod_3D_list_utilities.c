@@ -12,20 +12,6 @@
 
 Cod3D *head, *tail;
 
-/*ListNode *paramHead, *paramTail;
-
-void insertParam(Info *info){
-	ListNode *ptr = (ListNode *) malloc(sizeof(ListNode));
-	ptr->info = info;
-	ptr->next = NULL;
-	if (paramHead == NULL)
-		paramHead = paramTail = ptr;
-	else{
-		paramTail->next = ptr;
-		paramTail = ptr;
-	}
-}*/
-
 void insertCod3D(Op opCod, Info *arg1, Info *arg2, Info *res) {
 	Cod3D *aux = (Cod3D *) malloc(sizeof(Cod3D));
 	aux->opCod = opCod;
@@ -65,8 +51,6 @@ int debug_pasada = 1;
 Info *generateCod3DList(TreeNode *t) {
 	if (t==NULL)
 		return NULL;
-	//printf("pasada : %d \n\n", debug_pasada++);
-	//printCod3DList();
 	if (strcmp(t->label,"next")==0)
 		generateCod3DList(t->leftChild);
 	if (strcmp(t->label,"int")==0 || strcmp(t->label,"bool")==0 || strcmp(t->label,"var")==0 || strcmp(t->label,"global")==0)
@@ -152,7 +136,6 @@ Info *generateCod3DList(TreeNode *t) {
 		generateCod3DList(t->rightChild);
 		opCod = ENDIF;
 		insertCod3D(opCod,NULL,NULL,NULL);
-		//insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
 		return NULL;
 	}
 	else if (strcmp(t->label,"if_else")==0){
@@ -162,7 +145,6 @@ Info *generateCod3DList(TreeNode *t) {
 		opCod = ELSE_SENTENCE;
 		insertCod3D(opCod,NULL,NULL,NULL);
 		generateCod3DList(t->rightChild);		
-		//insertCod3D(opCod,generateCod3DList(t->leftChild),generateCod3DList(t->rightChild),NULL);
 		return NULL;
 	}
 	else if (strcmp(t->label,"while")==0){
@@ -190,7 +172,6 @@ Info *generateCod3DList(TreeNode *t) {
 	else if (strcmp(t->label,"call")==0){
 		countParams = 0;
 		generateCod3DList(t->leftChild);
-		//printParamList()
 		int i = 0;
 		Op opCod = LOAD;
 		while (!isEmpty()){
@@ -352,8 +333,6 @@ void generateAssembly(TreeNode *t, char *fileName){
 	strncpy(subStr,fileName,strlen(fileName)-3);
 	strcat(subStr,"s");
 	FILE *f = fopen(subStr,"w");
-	//fprintf(f,"%s\n","	.globl main");
-	//fprintf(f,"%s\n","main:");
 	char *else_lbl, *endif_lbl;
 	while (aux != NULL){
 		switch(aux->opCod){

@@ -58,11 +58,11 @@ extern							{	return EXTERN;	}
 
 [-+*/%,;()=!><{}]              	{ 	return *yytext;	  }
 
-"&&"							{ return AND;  	}
+"&&"							{ 	return AND;  	}
 
-"||"							{ return OR;	}
+"||"							{ 	return OR;	}
 
-"=="							{ return EQ;	}	
+"=="							{ 	return EQ;	}	
 
 "//".*\n                      	;
 

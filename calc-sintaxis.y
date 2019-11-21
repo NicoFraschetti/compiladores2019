@@ -14,8 +14,6 @@ int yylex(void);
 
 char *getName();
 
-char *currentType;
-
 int cantParams = 0;
 
 %}
@@ -82,8 +80,8 @@ func:
                             exit(1);
                         }
                         $2->info->level = symTblLevel();
-                        $2->info->type = currentType;
-                        insertInTable($2->info->name,1,-1,currentType,symTblLevel(),NULL,"function"); } block        {  
+                        $2->info->type = $1->label;
+                        insertInTable($2->info->name,1,-1,$2->info->type,symTblLevel(),NULL,"function"); } block        {  
                                         $2->info->lastOffSet = offSet();
                                         $$ = createNode(NULL,$6,$2->info,"function");
                                      }
@@ -108,46 +106,43 @@ func:
                                             printf("function %s already declared\n",$3->info->name);
                                             exit(1);
                                         }   
-                                        $3->info->type = currentType;
+                                        $3->info->type = $2->label;
                                         $3->info->level = symTblLevel();
-                                        insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"function");
+                                        insertInTable($3->info->name,1,-1,$3->info->type,symTblLevel(),NULL,"function");
                                         $3->info->lastOffSet = offSet();
                                         $$ = createNode(NULL,NULL,$3->info,"extern");  
                                      }
 
 paramList:
-    type ID {   LabelPair *p = (LabelPair *) malloc(sizeof(LabelPair)); 
-                p->else_tag = (char *) malloc(sizeof(char)*strlen(currentType));
-                strcpy(p->else_tag, currentType);
-                push(p);
-                cantParams ++;
+    type ID {   cantParams ++;
                 $2->info->offSet = cantParams;
             } ',' paramList   
                             {  
-                                int prm_offset;
-                                if ($2->info->offSet <= 6 && cantParams <= 6)
-                                    prm_offset = -((cantParams+1)*8+getParamOffSet());
-                                else if ($2->info->offSet <= 6 && cantParams > 6)
-                                    prm_offset = -(7*8+getParamOffSet());
-                                else
-                                    prm_offset = ($2->info->offSet-5)*8;
-                                Info *info = createNodeInfo($2->info->name,-1,prm_offset,top()->else_tag);  
-                                insertInTable(info->name,1,info->offSet,info->type,symTblLevel(),NULL,"param");
-                                pop();
-                                $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),$5,NULL,"next_arg"); 
+                                 int prm_offset;
+                                 if ($2->info->offSet <= 6 && cantParams <= 6)
+                                     prm_offset = -((cantParams+1)*8+getParamOffSet());
+                                 else if ($2->info->offSet <= 6 && cantParams > 6)
+                                     prm_offset = -(7*8+getParamOffSet());
+                                 else
+                                     prm_offset = ($2->info->offSet-5)*8;
+                                 $2->info->offSet = prm_offset;
+                                 $2->info->type = $1->label;  
+                                 insertInTable($2->info->name,1,$2->info->offSet,$2->info->type,symTblLevel(),NULL,"param");
+                                 $$ = createNode(createNode(NULL,NULL,$2->info,"formal_arg"),$5,NULL,"next_arg"); 
                             }
     | type ID               {   
-                                cantParams++;
-                                resetParamOffSet();
-                                incSymTblLevel();
-                                int prm_offset;
-                                if (cantParams <= 6)
-                                    prm_offset = -((cantParams+1)*8+getParamOffSet());
-                                else
-                                    prm_offset = (cantParams-5)*8;
-                                Info *info = createNodeInfo($2->info->name,-1,prm_offset,currentType);
-                                insertInTable(info->name,1,info->offSet,info->type,symTblLevel(),NULL,"param"); 
-                                $$ = createNode(createNode(NULL,NULL,info,"formal_arg"),NULL,NULL,"next_arg"); 
+                                 cantParams++;
+                                 resetParamOffSet();
+                                 incSymTblLevel();
+                                 int prm_offset;
+                                 if (cantParams <= 6)
+                                     prm_offset = -((cantParams+1)*8+getParamOffSet());
+                                 else
+                                     prm_offset = (cantParams-5)*8;
+                                 $2->info->offSet = prm_offset;
+                                 $2->info->type = $1->label;
+                                 insertInTable($2->info->name,1,$2->info->offSet,$2->info->type,symTblLevel(),NULL,"param"); 
+                                 $$ = createNode(createNode(NULL,NULL,$2->info,"formal_arg"),NULL,NULL,"next_arg"); 
                             }   
     ;
 program:
@@ -160,34 +155,18 @@ decls:
     ;
 decl:
     VAR type ID ';'         {    
-                                 if ($3->info->offSet == -1){
-                                    $3->info->offSet = getOffSet();
-                                    $3->info->level = symTblLevel();
-                                    $3->info->type = currentType;
-                                    insertInTable($3->info->name,0,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
-                                 }
-                                 else{
-                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
-                                    info->level = symTblLevel();
-                                    $3->info = info;
-                                    insertInTable($3->info->name,0,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
-                                 }
+                                 $3->info->offSet = getOffSet();
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 insertInTable($3->info->name,0,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
                                  $$ = NULL;
                             }
     | VAR type ID '=' expr ';'  
                             {    
-                                 if ($3->info->offSet == -1){
-                                    $3->info->offSet = getOffSet();
-                                    $3->info->level = symTblLevel();
-                                    $3->info->type = currentType;
-                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
-                                 }
-                                 else{
-                                    Info *info = createNodeInfo($3->info->name,-1,getOffSet(),currentType);
-                                    info->level = symTblLevel();
-                                    $3->info = info;
-                                    insertInTable($3->info->name,1,$3->info->offSet,currentType,symTblLevel(),NULL,"var");
-                                 }
+                                 $3->info->offSet = getOffSet();
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 insertInTable($3->info->name,1,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
     ;
@@ -197,47 +176,35 @@ globalDecls:
     ;
 globalDecl:
     VAR type ID ';'         {    
-                                $3->info->level = symTblLevel();
-                                $3->info->type = currentType;
-                                free($3->label);
-                                $3->label = (char *) malloc(10);
-                                strcpy($3->label,"global");
-                                //$3->label = "global";    
-                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
-                                $$ = createNode($3,NULL,NULL,"global_decl");
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 $3->label = "global";    
+                                 insertInTable($3->info->name,1,-1,$3->info->type,symTblLevel(),NULL,"global");
+                                 $$ = createNode($3,NULL,NULL,"global_decl");
                             }
     | VAR type ID '=' INT ';'  
                             {    
-                                $3->info->level = symTblLevel();
-                                $3->info->type = currentType;
-                                free($3->label);
-                                $3->label = (char *) malloc(10);
-                                strcpy($3->label,"global");
-                                //$3->label = "global";
-                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
-                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 $3->label = "global";
+                                 insertInTable($3->info->name,1,-1,$3->info->type,symTblLevel(),NULL,"global");
+                                 $$ = createNode($3,$5,NULL,"global_asig"); 
                             }
     | VAR type ID '=' TRUE ';'
                             {    
-                                $3->info->level = symTblLevel();
-                                $3->info->type = currentType;
-                                free($3->label);
-                                $3->label = (char *) malloc(10);
-                                strcpy($3->label,"global");
-                                //$3->label = "global";
-                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
-                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 $3->label = "global";
+                                 insertInTable($3->info->name,1,-1,$3->info->type,symTblLevel(),NULL,"global");
+                                 $$ = createNode($3,$5,NULL,"global_asig"); 
                             }
     | VAR type ID '=' FALSE ';'
                             {    
-                                $3->info->level = symTblLevel();
-                                $3->info->type = currentType;
-                                free($3->label);
-                                $3->label = (char *) malloc(10);
-                                strcpy($3->label,"global");
-                                //$3->label = "global";
-                                insertInTable($3->info->name,1,-1,currentType,symTblLevel(),NULL,"global");
-                                $$ = createNode($3,$5,NULL,"global_asig"); 
+                                 $3->info->level = symTblLevel();
+                                 $3->info->type = $2->label;
+                                 $3->label = "global";
+                                 insertInTable($3->info->name,1,-1,$3->info->type,symTblLevel(),NULL,"global");
+                                 $$ = createNode($3,$5,NULL,"global_asig"); 
                             }
     ;
 
@@ -269,8 +236,9 @@ statement:
 block: 
     {   incSymTblLevel();  }
     '{' program '}'         
-    {   decSymTblLevel();  }    {    $$ = $3; }
-    | ';'                       {    $$ = createNode(NULL,NULL,NULL,"next"); }
+    {   decSymTblLevel();  }    
+                            {    $$ = $3; }
+    | ';'                   {    $$ = createNode(NULL,NULL,NULL,"next"); }
     ;
 
 expr:
@@ -333,12 +301,8 @@ exprList:
     ;
 
 type:
-    INTEGER             {   currentType = "int"; 
-                            $$ = createNode(NULL,NULL,NULL,"int");
-                        }
-    | BOOL              {   currentType = "bool"; 
-                            $$ = createNode(NULL,NULL,NULL,"bool");
-                        }
+    INTEGER             {   $$ = createNode(NULL,NULL,NULL,"int"); }
+    | BOOL              {   $$ = createNode(NULL,NULL,NULL,"bool"); }
     ;
 
 %%

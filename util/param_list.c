@@ -15,7 +15,6 @@ void insertParam(Info *info){
 	ListNode *aux2 = (ListNode *) malloc(sizeof(ListNode));
 	aux2->info = info;
 	aux2->next = NULL;
-	//aux2->info = createNodeInfo(info->name,info->value,info->offSet,info->type);
 	if (head2 == NULL)
 		head2 = tail2 = aux2;
 	else{
