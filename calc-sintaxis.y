@@ -38,11 +38,11 @@ int cantParams = 0;
 
 prog:
     init                    {   
-                                generateDot($1,"dot_output.dot");
-                                printSymbolTable();
+                                //generateDot($1,"dot_output.dot");
+                                //printSymbolTable();
                                 generateAssembly($1,getName());
                                 //generateCod3DList($1);
-                                printCod3DList(); 
+                                //printCod3DList(); 
                             }  
 
 init:

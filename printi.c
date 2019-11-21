@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int printi(int x){
-	printf("%d\n", x);
+	printf("ejecutando printi%d\n", x);
 	return 0;
 }
 

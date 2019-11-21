@@ -572,7 +572,7 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 13: //if
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
-				if (aux->arg1->offSet == -1)
+				else if (aux->arg1->offSet == -1)
 					fprintf(f, "	movq 	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);
@@ -622,7 +622,7 @@ void generateAssembly(TreeNode *t, char *fileName){
 			case 19: //endwhile
 				if (aux->arg1->name == NULL)
 					fprintf(f, "	movq	$%d, %%r10\n", aux->arg1->value);
-				if (aux->arg1->offSet == -1)
+				else if (aux->arg1->offSet == -1)
 					fprintf(f, "	movq 	%s(%%rip), %%r10\n", aux->arg1->name);
 				else
 					fprintf(f, "	movq	%d(%%rbp), %%r10\n", aux->arg1->offSet);

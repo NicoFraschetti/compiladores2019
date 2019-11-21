@@ -1,14 +1,6 @@
-var int n = 1;
-extern int printi(int x);
-int fact(int n){
-	if (n==0){
-		return 1;
-	}
-	else{
-		return n * fact(n-1);
-	}
-}
-int main() {
-	var int b = fact(4);
-	return printi(b);
+extern int printi(int n);
+extern int factorial(int n);
+int main(){
+  var int res = printi(factorial(5));
+  return 0;
 }

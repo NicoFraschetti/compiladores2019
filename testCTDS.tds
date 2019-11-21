@@ -1,0 +1,339 @@
+// abre el archivo con los datos de entrada
+extern int init_input();
+
+// cierra el archivo
+extern int close_input();
+
+extern int print_int(int exp);
+
+// Retorna un entero leido de un archivo de entradas llamado Input
+extern int get_int();
+
+//         op==1 --> "---------------------------------------------------------"
+ 
+//         op==2 	--> "Factorial ----------------------------------"
+        
+//         op==3 --> "PotenciaI----------------------------------"
+        	        
+//         op==4--> "Potencia ----------------------------------"
+	
+//         op==5--> "Nthprime ----------------------------------"
+
+//         op==6--> " "       	
+	
+//         op==7--> "Int2Bin ----------------------------------"
+	
+//         op==8--> "GCD ----------------------------------"
+
+//         op==9--> "test----------------------------------"       	
+	
+//         op==10--> "test1----------------------------------"
+
+extern int printString(int op);
+extern int printStringPotenciaValor(int x, int y);
+extern int printStringPotenciaIValor(int x, int y);
+extern int printStringFactorialValor(int x);
+extern int printStringNthprimeValor(int x);
+extern int printStringInt2BinValor(int x);
+extern int printStringGCDValor(int x, int y);
+extern int printStringFibonacciValor(int x);
+
+// Retorna el "n-esimo" numero de la serie de Fibonacci.
+int fibonacci(int n)
+{
+    var int i;
+    var int term1;
+    var int term2;
+    var int nextTerm;
+    
+    term1 = 0;
+    term2 = 1;
+    i = 1;
+    while (i < n)
+    {   
+        nextTerm = term1 + term2;
+        term1 = term2;
+        term2 = nextTerm;
+        i = i+1;
+    }
+    
+    if (n == 0 || n < 0){
+       return 0;
+    }
+    else{
+	return term2;
+    }
+}
+
+// retorna el factorial de v, con v hasta 15
+int factorial (int v){
+  var int limit;
+  limit = 15;
+  if ( v > limit){
+    return -1;
+  }
+  //nuevo bloque
+  if (true){ 
+    var int c;
+    var int fact;
+    c = 0;
+    fact = 1;
+    while (c<v){
+       c = c+1;
+       fact = fact*c;
+    }
+    return fact;
+    }
+}
+
+
+// retorna el n esimo primo
+int nthprime (int n) {
+    var int i;
+    var int divs;
+    i = 0;
+    divs = 2;
+    n = n +1;
+    while ( n > 0) {
+      var bool divides;
+      divides = false;
+      i = i + 1;
+      while ( !divides && divs < i) {
+       if ( i % divs == 0)
+         { divides = true; }
+       else
+         { divs = divs + 1; }
+      }
+      divs = 2;
+      if ( ! divides)
+        { n = n - 1; }
+    }
+    return i;
+}
+
+
+
+// retorna el maximo comun divisor de a y b,
+int gcd (int a, int b) {
+	var int i;
+	var int result;
+	i=1;
+	result=i;
+	while ( i < (a+b)) {
+		if (((a % i) == 0) &&  ((b%i) ==0 ))
+			{ result = i; }
+		i = i + 1;
+	}
+	return result;
+}
+
+// Calcula el valor del entero m elevado a la n
+int potencia(int m, int n){
+	var int i;
+	var int acum;
+       var bool break= false;
+	acum=1;
+	i=1;
+	while (!break){
+		if(i<n || i==n){
+			acum=acum * m;
+			i=i+1;
+		}
+		else { break=true;}
+	} 
+	return(acum);  
+}
+
+
+// Calcula el valor del real m elevado a la n
+int potenciaI(int m, int n){
+	var int i;
+	var int acum;
+	acum=1;
+	i=1;
+	while (i<n || i==n){
+		acum=acum * m;
+		i=i+1;
+	}
+	return(acum);
+}
+
+// retorna la representacion de un numero en binario
+int int_to_bin(int number){
+    var int binary = 0;
+    var int counter = 0;
+    while(number > 0){
+        var int remainder = number % 2;
+        number = number / 2;
+        binary = binary + potenciaI(10, counter) * remainder;
+        counter= counter +1;
+    }
+    return binary;
+}
+
+// invoca varias funciones
+int test(){
+    var int aux = 2; 
+    var int x1= factorial(3);
+    var int x2 = factorial(4);
+    aux= gcd(x1,x2);
+    aux = nthprime(gcd(factorial(3),aux));
+    
+    return ( print_int(aux) );
+}
+
+// invoca test
+int test1(){
+    var int aux;
+    var int print1;
+    var int print2;
+    aux = 1;
+    print1 = print_int(potencia(nthprime(4),aux +1));
+    print2 = print_int(test());
+    return 0;
+}
+
+// funcion main 
+int main (){
+       
+        var int x;
+        var int i = 0; 
+        var int call1;
+        var int call2;
+        call1 = init_input();
+
+// test factorial entero    
+        call2 = printString(2);    
+        x= get_int() ; // lee la cantidad de veces que ejecutara la funcion  
+        i = 0;        
+        while (i<x){              
+            var int aux;         
+            aux= get_int(); // lee los datos para invocar a la funcion
+            call1 = printStringFactorialValor(aux); // imprime: Factorial(aux)= 
+            aux = factorial(aux);
+            call2 = print_int(aux);             
+            i = i + 1;
+	    }
+        call1 = printString(1);
+
+
+
+// test PotenciaI entero    
+        call1 = printString(3);    
+        x= get_int() ; // lee la cantidad de veces que ejecutara la funcion  
+        
+        i = 0;        
+        while (i<x){              
+            var int aux1; 
+            var int aux2;   
+            var int res;    
+            aux1= get_int(); // lee los datos para invocar a la funcion
+            aux2= get_int();
+            call1 = printStringPotenciaIValor(aux1,aux2); // imprime: PotenciaI(aux1,aux2) = 
+            res = potenciaI(aux1,aux2);
+            call1 = print_int(res);             
+            i = i + 1;
+	    }
+         call1 = printString(1);
+		
+
+// test Potencia entero    
+        call1 = printString(4);    
+        x= get_int() ; // lee la cantidad de veces que ejecutara la funcion  
+        
+        i = 0;        
+        while (i<x){              
+            var int aux1; 
+            var int aux2; 
+            var int res;    
+       
+            aux1= get_int(); // lee los datos para invocar a la funcion
+            aux2= get_int();
+            call1 = printStringPotenciaValor(aux1,aux2); // imprime: Potencia(aux1,aux2) = 
+            res = potencia(aux1, aux2);
+            call1 = print_int(res);             
+            i = i + 1;
+	    }
+         call1 = printString(1);
+
+// test nthprime entero  
+        call1 = printString(5);    
+  
+        x=get_int(); // lee la cantidad de veces que ejecutara la funcion  
+        i = 0;        
+        while (i<x){              
+            var int aux;         
+            aux=get_int(); // lee los datos para invocar a la funcion
+            call1 =printStringNthprimeValor(aux); // imprime: Nthprime(aux) = 
+            aux = nthprime(aux);
+            call1 =print_int(aux);             
+            i =i + 1;
+	    }
+        call1=printString(1);
+
+
+// test int2bin entero    
+        call1=printString(7);    
+        x = get_int(); // lee la cantidad de veces que ejecutara la funcion  
+        i = 0;        
+        while (i<x){              
+            var int aux;         
+            aux=get_int(); // lee los datos para invocar a la funcion
+            call1=printStringInt2BinValor(aux); // imprime: Int2Bin(aux) = 
+            aux = int_to_bin(aux);
+            call1=print_int(aux);             
+            i = i+ 1;
+	    }
+         call1=printString(1);
+
+// test gcd entero    
+        call1=printString(8);    
+
+        x= get_int(); // lee la cantidad de veces que ejecutara la funcion  
+        i = 0;        
+        while (i<x){              
+            var int aux1;
+            var int aux2;
+            var int res;    
+
+            aux1=get_int(); // lee los datos para invocar a la funcion
+            aux2=get_int(); // lee los datos para invocar a la función
+            call1=printStringGCDValor(aux1, aux2); // imprime: GCD(aux1,aux2)= 
+            res = gcd(aux1,aux2);
+            call1=print_int(res);             
+            i = i + 1;
+	    }
+         call1=printString(1);
+
+
+// test Fibonacci 
+    call1=printString(6);
+    x= get_int(); // lee la cantidad de veces que ejecutara la funcion
+    i = 0;
+    while (i<x){
+        var int aux1;
+        var int res;
+        aux1=get_int(); // lee los datos para invocar a la funcion
+        call1=printStringFibonacciValor(aux1); // imprime: Fibonacci(aux1)= 
+        res =fibonacci(aux1);
+        call1=print_int(res);
+        i = i + 1;
+    }
+    call1=printString(1);
+    
+    
+
+// test test    
+        call1=printString(9);
+        call1=test();
+        call1=printString(1);
+
+
+// test test1 
+        call1=printString(10);
+        call1=test1();
+        call1=printString(2);
+        call1=close_input();
+
+        return 0;
+} // endmain
