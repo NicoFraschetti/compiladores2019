@@ -1,3 +1,4 @@
+<pre>
 A simple minimal C like language. Only provides a small part of all the funcionality of C.
 To run this program in ubuntu:
   git clone https://github.com/NicoFraschetti/compiladores2019
@@ -8,3 +9,4 @@ To run this program in ubuntu:
   ./a.out SOURCE_PROGRAM
   
   SOURCE_PROGRAM must respect the syntax of this compiler. For more information, see doc/.
+</pre>
