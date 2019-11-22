@@ -50,10 +50,10 @@ init:
 
 funcList:
     func funcList           {   $$ = createNode($1,$2,NULL,"next"); }
-    | INTEGER MAIN '(' ')' { resetOffSet(0); } '{' program '}' { 
+    | INTEGER MAIN '(' ')' { resetOffSet(0); } block { 
                                                 Info *info = createNodeInfo("main",-1,-1,"int");
                                                 info->lastOffSet = offSet(); 
-                                                $$ = createNode(NULL,$7,info,"function"); 
+                                                $$ = createNode(NULL,$6,info,"function"); 
                                            }
     ;
 
@@ -61,7 +61,7 @@ func:
     type ID '(' paramList ')' { cantParams = 0; 
                                 resetOffSet(-(paramTreeSize($4)*8));
                                 ListNode *aux = findListNode($2->info->name);
-                                if (aux!=NULL){ //Undeclared variable
+                                if (aux!=NULL){
                                     printf("function %s already declared\n",$2->info->name);
                                     exit(1);
                                 }
@@ -75,7 +75,7 @@ func:
                                      }
     | type ID '(' ')' { resetOffSet(0);
                         ListNode *aux = findListNode($2->info->name);
-                        if (aux!=NULL){ //Undeclared variable
+                        if (aux!=NULL){
                             printf("function %s already declared\n",$2->info->name);
                             exit(1);
                         }
@@ -90,7 +90,7 @@ func:
                                         resetOffSet(-(paramTreeSize($5)*8));
                                         decSymTblLevel();
                                         ListNode *aux = findListNode($3->info->name);
-                                        if (aux!=NULL){ //Undeclared variable
+                                        if (aux!=NULL){
                                             printf("function %s already declared\n",$3->info->name);
                                             exit(1);
                                         }   
@@ -102,7 +102,7 @@ func:
                                       }
     | EXTERN type ID '(' ')' ';'     {  
                                         ListNode *aux = findListNode($3->info->name);
-                                        if (aux!=NULL){ //Undeclared variable
+                                        if (aux!=NULL){
                                             printf("function %s already declared\n",$3->info->name);
                                             exit(1);
                                         }   
@@ -126,7 +126,8 @@ paramList:
                                  else
                                      prm_offset = ($2->info->offSet-5)*8;
                                  $2->info->offSet = prm_offset;
-                                 $2->info->type = $1->label;  
+                                 $2->info->type = $1->label;
+                                 $2->info->level = symTblLevel();  
                                  insertInTable($2->info->name,1,$2->info->offSet,$2->info->type,symTblLevel(),NULL,"param");
                                  $$ = createNode(createNode(NULL,NULL,$2->info,"formal_arg"),$5,NULL,"next_arg"); 
                             }
@@ -141,6 +142,7 @@ paramList:
                                      prm_offset = (cantParams-5)*8;
                                  $2->info->offSet = prm_offset;
                                  $2->info->type = $1->label;
+                                 $2->info->level = symTblLevel();
                                  insertInTable($2->info->name,1,$2->info->offSet,$2->info->type,symTblLevel(),NULL,"param"); 
                                  $$ = createNode(createNode(NULL,NULL,$2->info,"formal_arg"),NULL,NULL,"next_arg"); 
                             }   
@@ -155,18 +157,33 @@ decls:
     ;
 decl:
     VAR type ID ';'         {    
-                                 $3->info->offSet = getOffSet();
-                                 $3->info->level = symTblLevel();
-                                 $3->info->type = $2->label;
-                                 insertInTable($3->info->name,0,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
+                                 if ($3->info->offSet==-1 && findNode($3->info->name)==NULL){
+                                     $3->info->offSet = getOffSet();
+                                     $3->info->level = symTblLevel();
+                                     $3->info->type = $2->label;
+                                     insertInTable($3->info->name,0,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
+                                 }
+                                 else{
+                                     Info *info = createNodeInfo($3->info->name,-1,getOffSet(),$2->label);
+                                     info->level = symTblLevel();
+                                     insertInTable(info->name,0,info->offSet,info->type,info->level,NULL,"var");
+                                 }
                                  $$ = NULL;
                             }
     | VAR type ID '=' expr ';'  
                             {    
-                                 $3->info->offSet = getOffSet();
-                                 $3->info->level = symTblLevel();
-                                 $3->info->type = $2->label;
-                                 insertInTable($3->info->name,1,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
+                                 if ($3->info->offSet==-1 && findNode($3->info->name)==NULL){
+                                     $3->info->offSet = getOffSet();
+                                     $3->info->level = symTblLevel();
+                                     $3->info->type = $2->label;
+                                     insertInTable($3->info->name,1,$3->info->offSet,$3->info->type,symTblLevel(),NULL,"var");
+                                 }
+                                 else{
+                                     Info *info = createNodeInfo($3->info->name,-1,getOffSet(),$2->label);
+                                     info->level = symTblLevel();
+                                     $3->info = info;
+                                     insertInTable(info->name,1,info->offSet,info->type,info->level,NULL,"var");
+                                 }
                                  $$ = createNode($3,$5,NULL,"asig"); 
                             }
     ;

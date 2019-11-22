@@ -1,6 +1,27 @@
-extern int printi(int n);
-extern int factorial(int n);
+var int n;
 int main(){
-  var int res = printi(factorial(5));
-  return 0;
+	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

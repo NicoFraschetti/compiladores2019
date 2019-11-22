@@ -58,7 +58,6 @@ void add(char *name, int initialized, int offset, char *type, int lvl, TreeNode 
 	aux->initialized = initialized;
 	aux->label = label;
 	while (paramList != NULL){
-		//addType(aux->head,aux->tail,t->leftChild->info->type);
 		TypesList *aux2 = (TypesList *) malloc(sizeof(TypesList));
 		aux2->type = (char *) malloc(sizeof(char)*strlen(type));
 		strcpy(aux2->type,paramList->leftChild->info->type);
