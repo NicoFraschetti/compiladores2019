@@ -2,8 +2,7 @@ a.out
 calc-sintaxis.tab.c
 calc-sintaxis.tab.h
 dot_output.dot
-input
-input.o
-input.s
+*.o
+*.s
 label_list
 lex.yy.c
